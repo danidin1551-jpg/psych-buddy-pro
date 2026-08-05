@@ -129,7 +129,14 @@ export function PracticeScreen({
               </>
             )}
           </div>
-          <p className="whitespace-pre-line text-sm text-muted-foreground">{question.explanation}</p>
+          <div className="text-sm text-muted-foreground">
+            {question.explanation.split("\n").map((line, i) => (
+              <p key={i} dir="auto">
+                {line}
+              </p>
+            ))}
+          </div>
+
           <button
             onClick={onNext}
             className="mt-4 w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
