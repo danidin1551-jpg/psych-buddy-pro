@@ -14,6 +14,23 @@ import {
   saveMissed,
   saveStats,
 } from "@/lib/psychomath/storage";
+import {
+  currentStreakValue,
+  emptyStreak,
+  loadStreak,
+  practicedToday,
+  recordPracticeDay,
+  saveStreak,
+  type StreakData,
+} from "@/lib/psychomath/streaks";
+import {
+  isMuted,
+  playCorrect,
+  playFinish,
+  playLevelUp,
+  playWrong,
+  setMuted as persistMuted,
+} from "@/lib/psychomath/sound";
 import type {
   CategoryKey,
   LevelMap,
@@ -23,10 +40,12 @@ import type {
   StatsMap,
 } from "@/lib/psychomath/types";
 
-export type Screen = "home" | "practice" | "stats" | "summary";
-export type SessionKind = "endless" | "exam" | "review";
+export type Screen = "home" | "practice" | "stats" | "summary" | "path";
+export type SessionKind = "endless" | "exam" | "review" | "timed" | "fix";
 
 export const EXAM_LENGTH = 10;
+/** אורכי מנה קצרה בדקות */
+export const SHORT_SESSION_MINUTES = [3, 5] as const;
 
 interface Feedback {
   isCorrect: boolean;
@@ -40,14 +59,19 @@ interface Session {
   correct: number;
   totalTime: number;
   missed: MissedQuestion[];
+  /** משך יעד במילישניות (למנה קצרה) */
+  durationMs: number | null;
+  endsAt: number | null;
 }
 
-const emptySession = (kind: SessionKind): Session => ({
+const emptySession = (kind: SessionKind, durationMs: number | null = null): Session => ({
   kind,
   answered: 0,
   correct: 0,
   totalTime: 0,
   missed: [],
+  durationMs,
+  endsAt: durationMs ? Date.now() + durationMs : null,
 });
 
 export function usePsychoMath() {
@@ -62,29 +86,50 @@ export function usePsychoMath() {
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [session, setSession] = useState<Session>(() => emptySession("endless"));
+  const [dayStreak, setDayStreak] = useState<StreakData>(emptyStreak);
+  const [muted, setMutedState] = useState(false);
+  const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const [levelUpFlash, setLevelUpFlash] = useState<CategoryKey | null>(null);
   const [ready, setReady] = useState(false);
 
   const startTimeRef = useRef(0);
   const recentRef = useRef<string[]>([]);
   const reviewQueueRef = useRef<Question[]>([]);
   const catStreakRef = useRef<Record<string, { up: number; down: number }>>({});
+  const nextDeltaRef = useRef(0);
 
   useEffect(() => {
     setStats(loadStats());
     setLevels(loadLevels());
     setMissed(loadMissed());
+    setDayStreak(loadStreak());
+    setMutedState(isMuted());
     setReady(true);
+  }, []);
+
+  const toggleMuted = useCallback(() => {
+    setMutedState((prev) => {
+      persistMuted(!prev);
+      return !prev;
+    });
   }, []);
 
   const pushQuestion = useCallback(
     (nextMode: ModeKey, currentLevels: LevelMap, currentStats: StatsMap, kind: SessionKind) => {
       let q: Question | undefined;
-      if (kind === "review") {
+      if (kind === "review" || kind === "fix") {
         q = reviewQueueRef.current.shift();
       }
       if (!q) {
-        q = generateQuestion(nextMode, currentLevels, currentStats, recentRef.current);
+        q = generateQuestion(
+          nextMode,
+          currentLevels,
+          currentStats,
+          recentRef.current,
+          nextDeltaRef.current,
+        );
       }
+      nextDeltaRef.current = 0;
       recentRef.current = [...recentRef.current, q.signature].slice(-6);
       setQuestion(q);
       setUserInput("");
@@ -95,11 +140,15 @@ export function usePsychoMath() {
   );
 
   const startPractice = useCallback(
-    (nextMode: ModeKey, kind: SessionKind = "endless") => {
+    (nextMode: ModeKey, kind: SessionKind = "endless", minutes?: number) => {
       setMode(nextMode);
-      setSession(emptySession(kind));
+      const duration = kind === "timed" ? (minutes ?? 3) * 60_000 : null;
+      setSession(emptySession(kind, duration));
+      setRemainingMs(duration);
       setStreak(0);
       recentRef.current = [];
+      // שאלת חימום ברמה נמוכה יותר בתחילת כל סשן
+      nextDeltaRef.current = -1;
       pushQuestion(nextMode, levels, stats, kind);
       setScreen("practice");
     },
@@ -111,30 +160,70 @@ export function usePsychoMath() {
     reviewQueueRef.current = missed.slice(0, EXAM_LENGTH).map((m) => m.question);
     setMode("mixed");
     setSession(emptySession("review"));
+    setRemainingMs(null);
     setStreak(0);
     recentRef.current = [];
+    nextDeltaRef.current = 0;
     pushQuestion("mixed", levels, stats, "review");
     setScreen("practice");
   }, [missed, levels, stats, pushQuestion]);
 
+  /** סבב תיקון מיידי על הטעויות של הסשן שהסתיים */
+  const startFixRound = useCallback(() => {
+    const queue = session.missed.map((m) => m.question);
+    if (queue.length === 0) return;
+    reviewQueueRef.current = queue;
+    setSession(emptySession("fix"));
+    setRemainingMs(null);
+    setStreak(0);
+    recentRef.current = [];
+    nextDeltaRef.current = 0;
+    pushQuestion(mode, levels, stats, "fix");
+    setScreen("practice");
+  }, [session.missed, mode, levels, stats, pushQuestion]);
+
+  const finishSession = useCallback(() => {
+    playFinish();
+    setScreen("summary");
+  }, []);
+
   const nextQuestion = useCallback(() => {
-    const isExam = session.kind === "exam";
-    if (isExam && session.answered >= EXAM_LENGTH) {
-      setScreen("summary");
+    if (session.kind === "exam" && session.answered >= EXAM_LENGTH) {
+      finishSession();
       return;
     }
-    if (session.kind === "review" && reviewQueueRef.current.length === 0) {
-      setScreen("summary");
+    if ((session.kind === "review" || session.kind === "fix") && reviewQueueRef.current.length === 0) {
+      finishSession();
+      return;
+    }
+    if (session.kind === "timed" && session.endsAt && Date.now() >= session.endsAt) {
+      finishSession();
       return;
     }
     pushQuestion(mode, levels, stats, session.kind);
-  }, [mode, levels, stats, session, pushQuestion]);
+  }, [mode, levels, stats, session, pushQuestion, finishSession]);
+
+  // טיימר מנה קצרה
+  useEffect(() => {
+    if (screen !== "practice" || !session.endsAt) return;
+    const id = window.setInterval(() => {
+      const left = session.endsAt! - Date.now();
+      setRemainingMs(Math.max(0, left));
+      if (left <= 0) {
+        window.clearInterval(id);
+        finishSession();
+      }
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [screen, session.endsAt, finishSession]);
 
   const grade = useCallback(
     (isCorrect: boolean, given: string) => {
       if (!question) return;
       const elapsed = Date.now() - startTimeRef.current;
       const cat: CategoryKey = question.sourceCategory;
+
+      setDayStreak((prev) => (practicedToday(prev) ? prev : recordPracticeDay(prev)));
 
       setStats((prev) => {
         const base = prev[cat];
@@ -164,10 +253,21 @@ export function usePsychoMath() {
         cs.up = 0;
       }
       catStreakRef.current[cat] = cs;
+
+      // אחרי שתי טעויות רצופות — השאלה הבאה קלה יותר
+      if (!isCorrect && cs.down >= 2) nextDeltaRef.current = -1;
+
       if (cs.up >= 3 || cs.down >= 2) {
         setLevels((prev) => {
           const current = prev[cat] ?? 1;
           const next = cs.up >= 3 ? Math.min(current + 1, 10) : Math.max(current - 1, 1);
+          if (next > current) {
+            playLevelUp();
+            setLevelUpFlash(cat);
+            window.setTimeout(() => setLevelUpFlash(null), 1600);
+            // רמה חדשה מתחילה מהקצה הקל שלה
+            nextDeltaRef.current = -1;
+          }
           const updated = { ...prev, [cat]: next };
           saveLevels(updated);
           return updated;
@@ -178,6 +278,8 @@ export function usePsychoMath() {
       setStreak((prev) => {
         const next = isCorrect ? prev + 1 : 0;
         setBestStreak((b) => Math.max(b, next));
+        if (isCorrect) playCorrect(next);
+        else playWrong();
         return next;
       });
 
@@ -188,7 +290,7 @@ export function usePsychoMath() {
           saveMissed(updated);
           return updated;
         });
-      } else if (session.kind === "review") {
+      } else if (session.kind === "review" || session.kind === "fix") {
         setMissed((prev) => {
           const updated = prev.filter((m) => m.question.signature !== question.signature);
           saveMissed(updated);
@@ -237,10 +339,12 @@ export function usePsychoMath() {
 
   const resetStats = useCallback(() => {
     clearAll();
+    saveStreak(emptyStreak());
     setStats(defaultStats());
     setLevels(defaultLevels());
     setMissed([]);
     setBestStreak(0);
+    setDayStreak(emptyStreak());
     catStreakRef.current = {};
   }, []);
 
@@ -248,6 +352,7 @@ export function usePsychoMath() {
     setScreen("home");
     setQuestion(null);
     setFeedback(null);
+    setRemainingMs(null);
   }, []);
 
   return {
@@ -263,10 +368,19 @@ export function usePsychoMath() {
     streak,
     bestStreak,
     session,
+    dayStreak,
+    dayStreakValue: currentStreakValue(dayStreak),
+    practicedToday: practicedToday(dayStreak),
+    muted,
+    toggleMuted,
+    remainingMs,
+    levelUpFlash,
     ready,
     startPractice,
     startReview,
+    startFixRound,
     nextQuestion,
+    finishSession,
     submitNumeric,
     submitCompare,
     handleKeypad,

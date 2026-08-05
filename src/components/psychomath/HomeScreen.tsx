@@ -1,12 +1,21 @@
-import { BarChart3, RotateCcw, Sparkles, Flame } from "lucide-react";
+import { BarChart3, Map, RotateCcw, Sparkles, Timer, Volume2, VolumeX } from "lucide-react";
 import { CATEGORY_META, type ModeKey } from "@/lib/psychomath/types";
+import { StreakCard } from "./StreakCard";
+import type { StreakData } from "@/lib/psychomath/streaks";
+import { SHORT_SESSION_MINUTES, type SessionKind } from "@/hooks/usePsychoMath";
 
 interface Props {
-  onStart: (mode: ModeKey, kind: "endless" | "exam") => void;
+  onStart: (mode: ModeKey, kind: SessionKind, minutes?: number) => void;
   onShowStats: () => void;
+  onShowPath: () => void;
   onReview: () => void;
   missedCount: number;
   bestStreak: number;
+  dayStreak: StreakData;
+  dayStreakValue: number;
+  practicedToday: boolean;
+  muted: boolean;
+  onToggleMuted: () => void;
 }
 
 const ORDER: ModeKey[] = [
@@ -20,23 +29,69 @@ const ORDER: ModeKey[] = [
   "probability",
 ];
 
-export function HomeScreen({ onStart, onShowStats, onReview, missedCount, bestStreak }: Props) {
+export function HomeScreen({
+  onStart,
+  onShowStats,
+  onShowPath,
+  onReview,
+  missedCount,
+  bestStreak,
+  dayStreak,
+  dayStreakValue,
+  practicedToday,
+  muted,
+  onToggleMuted,
+}: Props) {
   return (
-    <div className="flex flex-col gap-6 py-2">
+    <div className="flex flex-col gap-5 py-2">
       <header className="pt-2 text-center">
         <div className="mb-3 inline-flex items-center gap-2">
           <span className="text-2xl font-black tracking-wider text-primary">PsychoMath</span>
           <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] text-primary">
-            v5
+            v6
           </span>
         </div>
         <h1 className="mb-1 text-lg font-bold sm:text-xl">
           תרגול חישוב מנטלי ופתרון בעיות כמותי
         </h1>
         <p className="text-xs text-muted-foreground sm:text-sm">
-          בחרי נושא כדי להתחיל · הרמה מותאמת אוטומטית לביצועים שלך
+          מנה קצרה כל יום · הרמה מותאמת אוטומטית לביצועים שלך
         </p>
       </header>
+
+      <StreakCard data={dayStreak} value={dayStreakValue} today={practicedToday} />
+
+      <div className="rounded-2xl border border-[var(--accent-violet)] bg-[color-mix(in_oklch,var(--accent-violet)_12%,var(--card))] p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Timer className="h-4 w-4 text-[var(--accent-violet)]" />
+          <span className="text-sm font-bold">מנה קצרה — התחילי עכשיו</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {SHORT_SESSION_MINUTES.map((m) => (
+            <button
+              key={m}
+              onClick={() => onStart("mixed", "timed", m)}
+              className="rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-transform hover:bg-primary/90 active:scale-[0.98]"
+            >
+              {m} דקות
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          סשן קצר שאפשר להספיק בתור, בהפסקה או בנסיעה.
+        </p>
+      </div>
+
+      <button
+        onClick={onShowPath}
+        className="flex items-center justify-between rounded-2xl border border-border bg-card p-4 text-right transition-colors hover:border-primary"
+      >
+        <span className="flex flex-col items-start gap-0.5">
+          <span className="text-sm font-bold">מסלול המיומנויות</span>
+          <span className="text-xs text-muted-foreground">ראי בדיוק איפה את ולאן ממשיכים</span>
+        </span>
+        <Map className="h-5 w-5 text-primary" />
+      </button>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {ORDER.map((key) => {
@@ -66,7 +121,7 @@ export function HomeScreen({ onStart, onShowStats, onReview, missedCount, bestSt
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           onClick={() => onStart("mixed", "exam")}
-          className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-sm font-semibold transition-colors hover:bg-accent"
         >
           <Sparkles className="h-4 w-4" /> סימולציה מתוזמנת · 10 שאלות
         </button>
@@ -80,15 +135,22 @@ export function HomeScreen({ onStart, onShowStats, onReview, missedCount, bestSt
       </div>
 
       <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm">
-        <span className="flex items-center gap-2 text-muted-foreground">
-          <Flame className="h-4 w-4 text-[var(--accent-amber)]" /> רצף שיא בסשן: {bestStreak}
-        </span>
-        <button
-          onClick={onShowStats}
-          className="flex items-center gap-2 text-primary transition-colors hover:opacity-80"
-        >
-          <BarChart3 className="h-4 w-4" /> מרכז נתונים
-        </button>
+        <span className="text-muted-foreground">רצף שיא בסשן: {bestStreak}</span>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onToggleMuted}
+            aria-label={muted ? "הפעלת צלילים" : "השתקת צלילים"}
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </button>
+          <button
+            onClick={onShowStats}
+            className="flex items-center gap-2 text-primary transition-colors hover:opacity-80"
+          >
+            <BarChart3 className="h-4 w-4" /> מרכז נתונים
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,9 @@ interface Props {
   feedback: { isCorrect: boolean; elapsed: number; given: string } | null;
   streak: number;
   progressLabel: string;
+  remainingMs?: number | null;
+  totalMs?: number | null;
+  levelUp?: boolean;
   onKeypad: (key: string) => void;
   onSubmitNumeric: () => void;
   onSubmitCompare: (value: number) => void;
@@ -21,18 +24,28 @@ function formatSeconds(ms: number) {
   return (ms / 1000).toFixed(1);
 }
 
+function formatClock(ms: number) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  return `${Math.floor(total / 60)}:${`${total % 60}`.padStart(2, "0")}`;
+}
+
+
 export function PracticeScreen({
   question,
   userInput,
   feedback,
   streak,
   progressLabel,
+  remainingMs = null,
+  totalMs = null,
+  levelUp = false,
   onKeypad,
   onSubmitNumeric,
   onSubmitCompare,
   onNext,
   onBack,
 }: Props) {
+
   const isCompare = question.type === "compare";
   const [elapsed, setElapsed] = useState(0);
 
@@ -94,9 +107,36 @@ export function PracticeScreen({
         </div>
       </div>
 
+      {remainingMs !== null && (
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-muted-foreground">{formatClock(remainingMs)}</span>
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-[var(--accent-violet)] transition-[width] duration-200"
+              style={{ width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="text-center text-xs text-muted-foreground">{progressLabel}</div>
 
-      <div className="relative flex min-h-[180px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-border bg-card p-6 text-center shadow-xl sm:p-8">
+      {levelUp && (
+        <div className="animate-pop rounded-xl border border-[var(--accent-amber)] bg-[color-mix(in_oklch,var(--accent-amber)_14%,var(--card))] p-2 text-center text-xs font-semibold">
+          עלית רמה בנושא הזה
+        </div>
+      )}
+
+      <div
+        key={question.signature + String(Boolean(feedback))}
+        className={`relative flex min-h-[180px] flex-col items-center justify-center overflow-hidden rounded-3xl border bg-card p-6 text-center shadow-xl sm:p-8 ${
+          feedback
+            ? feedback.isCorrect
+              ? "animate-pop border-[var(--accent-emerald)]"
+              : "animate-shake border-destructive"
+            : "animate-fade-in border-border"
+        }`}
+      >
         <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary">
           {question.typeLabel}
         </div>
@@ -112,8 +152,9 @@ export function PracticeScreen({
 
       {feedback ? (
         <div
-          className={`rounded-2xl border p-4 ${
+          className={`animate-fade-in rounded-2xl border p-4 ${
             feedback.isCorrect
+
               ? "border-[var(--accent-emerald)] bg-[color-mix(in_oklch,var(--accent-emerald)_12%,var(--card))]"
               : "border-destructive bg-[color-mix(in_oklch,var(--destructive)_12%,var(--card))]"
           }`}
