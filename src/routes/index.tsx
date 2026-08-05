@@ -31,7 +31,11 @@ function Index() {
       ? `שאלה ${Math.min(app.session.answered + 1, EXAM_LENGTH)} מתוך ${EXAM_LENGTH}`
       : app.session.kind === "review"
         ? "מצב חזרה על טעויות"
-        : `נענו ${app.session.answered} שאלות בסבב הזה`;
+        : app.session.kind === "fix"
+          ? "סבב תיקון"
+          : app.session.kind === "timed"
+            ? `מנה קצרה · ${app.session.answered} שאלות עד כה`
+            : `נענו ${app.session.answered} שאלות בסבב הזה`;
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
@@ -40,9 +44,24 @@ function Index() {
           <HomeScreen
             onStart={app.startPractice}
             onShowStats={() => app.setScreen("stats")}
+            onShowPath={() => app.setScreen("path")}
             onReview={app.startReview}
             missedCount={app.missed.length}
             bestStreak={app.bestStreak}
+            dayStreak={app.dayStreak}
+            dayStreakValue={app.dayStreakValue}
+            practicedToday={app.practicedToday}
+            muted={app.muted}
+            onToggleMuted={app.toggleMuted}
+          />
+        )}
+
+        {app.screen === "path" && (
+          <PathScreen
+            levels={app.levels}
+            stats={app.stats}
+            onStartCategory={(cat) => app.startPractice(cat, "timed", 3)}
+            onBack={app.goHome}
           />
         )}
 
@@ -53,12 +72,15 @@ function Index() {
             feedback={app.feedback}
             streak={app.streak}
             progressLabel={progressLabel}
+            remainingMs={app.remainingMs}
+            totalMs={app.session.durationMs}
+            levelUp={app.levelUpFlash !== null}
             onKeypad={app.handleKeypad}
             onSubmitNumeric={app.submitNumeric}
             onSubmitCompare={app.submitCompare}
             onNext={app.nextQuestion}
             onBack={() =>
-              app.session.kind === "endless" ? app.goHome() : app.setScreen("summary")
+              app.session.kind === "endless" ? app.goHome() : app.finishSession()
             }
           />
         )}
@@ -78,7 +100,16 @@ function Index() {
             correct={app.session.correct}
             totalTime={app.session.totalTime}
             missed={app.session.missed}
-            onRestart={() => app.startPractice(app.mode, app.session.kind === "review" ? "endless" : app.session.kind)}
+            onFixRound={app.session.kind === "fix" ? undefined : app.startFixRound}
+            onRestart={() =>
+              app.startPractice(
+                app.mode,
+                app.session.kind === "review" || app.session.kind === "fix"
+                  ? "endless"
+                  : app.session.kind,
+                app.session.durationMs ? app.session.durationMs / 60_000 : undefined,
+              )
+            }
             onHome={app.goHome}
           />
         )}
@@ -86,3 +117,4 @@ function Index() {
     </div>
   );
 }
+
