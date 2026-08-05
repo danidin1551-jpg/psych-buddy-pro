@@ -36,12 +36,16 @@ export function PracticeScreen({
   feedback,
   streak,
   progressLabel,
+  remainingMs = null,
+  totalMs = null,
+  levelUp = false,
   onKeypad,
   onSubmitNumeric,
   onSubmitCompare,
   onNext,
   onBack,
 }: Props) {
+
   const isCompare = question.type === "compare";
   const [elapsed, setElapsed] = useState(0);
 
