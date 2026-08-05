@@ -1,4 +1,4 @@
-import { Check, RotateCcw, X, Home } from "lucide-react";
+import { Check, RotateCcw, X, Home, Wrench } from "lucide-react";
 import type { MissedQuestion } from "@/lib/psychomath/types";
 
 interface Props {
@@ -8,9 +8,11 @@ interface Props {
   missed: MissedQuestion[];
   onRestart: () => void;
   onHome: () => void;
+  onFixRound?: () => void;
 }
 
-export function SummaryScreen({ answered, correct, totalTime, missed, onRestart, onHome }: Props) {
+export function SummaryScreen({ answered, correct, totalTime, missed, onRestart, onHome, onFixRound }: Props) {
+
   const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -32,12 +34,22 @@ export function SummaryScreen({ answered, correct, totalTime, missed, onRestart,
         ))}
       </div>
 
+      {missed.length > 0 && onFixRound && (
+        <button
+          onClick={onFixRound}
+          className="animate-pop flex items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          <Wrench className="h-4 w-4" /> סבב תיקון על {missed.length} הטעויות
+        </button>
+      )}
+
       {missed.length > 0 && (
         <div className="flex flex-col gap-2">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
             <X className="h-4 w-4 text-destructive" /> שאלות שטעית בהן
           </h3>
           {missed.map((m, i) => (
+
             <div key={i} className="rounded-2xl border border-border bg-card p-3 text-sm">
               <div className="mb-1 whitespace-pre-line font-medium">{m.question.text}</div>
               <div className="text-xs text-muted-foreground">
