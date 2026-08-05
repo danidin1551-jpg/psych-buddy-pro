@@ -8,7 +8,7 @@ interface Props {
   missed: MissedQuestion[];
   onRestart: () => void;
   onHome: () => void;
-  onFixRound?: () => void;
+  onFixRound?: (() => void) | undefined;
 }
 
 export function SummaryScreen({ answered, correct, totalTime, missed, onRestart, onHome, onFixRound }: Props) {

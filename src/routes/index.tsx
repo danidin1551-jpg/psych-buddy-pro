@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomeScreen } from "@/components/psychomath/HomeScreen";
 import { PracticeScreen } from "@/components/psychomath/PracticeScreen";
+import { PathScreen } from "@/components/psychomath/PathScreen";
 import { StatsScreen } from "@/components/psychomath/StatsScreen";
+
 import { SummaryScreen } from "@/components/psychomath/SummaryScreen";
 import { EXAM_LENGTH, usePsychoMath } from "@/hooks/usePsychoMath";
 
