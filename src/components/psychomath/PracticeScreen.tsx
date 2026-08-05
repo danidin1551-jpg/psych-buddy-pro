@@ -8,6 +8,9 @@ interface Props {
   feedback: { isCorrect: boolean; elapsed: number; given: string } | null;
   streak: number;
   progressLabel: string;
+  remainingMs?: number | null;
+  totalMs?: number | null;
+  levelUp?: boolean;
   onKeypad: (key: string) => void;
   onSubmitNumeric: () => void;
   onSubmitCompare: (value: number) => void;
@@ -20,6 +23,12 @@ const KEYS = ["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "del"];
 function formatSeconds(ms: number) {
   return (ms / 1000).toFixed(1);
 }
+
+function formatClock(ms: number) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  return `${Math.floor(total / 60)}:${`${total % 60}`.padStart(2, "0")}`;
+}
+
 
 export function PracticeScreen({
   question,
