@@ -483,15 +483,19 @@ export function generateQuestion(
   levels: Record<CategoryKey, number>,
   stats: StatsMap,
   recentSignatures: string[] = [],
+  levelDelta = 0,
 ): Question {
+  const levelOf = (cat: CategoryKey) =>
+    Math.max(1, Math.min(10, (levels[cat] ?? 1) + levelDelta));
   for (let attempt = 0; attempt < 12; attempt++) {
     const cat = mode === "mixed" ? pickAdaptiveCategory(stats) : mode;
-    const q = build(cat, levels[cat] ?? 1);
+    const q = build(cat, levelOf(cat));
     if (!recentSignatures.includes(q.signature)) return q;
   }
   const cat = mode === "mixed" ? pickAdaptiveCategory(stats) : mode;
-  return build(cat, levels[cat] ?? 1);
+  return build(cat, levelOf(cat));
 }
+
 
 /** ניתוח קלט משתמש: תומך בעשרוני, פסיק עשרוני ומינוס */
 export function parseUserAnswer(input: string): number | null {
