@@ -100,9 +100,14 @@ export function PracticeScreen({
         <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary">
           {question.typeLabel}
         </div>
-        <div className="whitespace-pre-line text-xl font-bold leading-relaxed sm:text-2xl">
-          {question.text}
+        <div className="text-xl font-bold leading-relaxed sm:text-2xl">
+          {question.text.split("\n").map((line, i) => (
+            <div key={i} dir="auto" className="min-h-[0.6em]">
+              {line}
+            </div>
+          ))}
         </div>
+
       </div>
 
       {feedback ? (
