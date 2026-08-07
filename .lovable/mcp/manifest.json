@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "psychometric-practice-pal",
+      "version": "0.1.0",
+      "title": "Psychometric Practice Pal"
+    },
+    "tools": [
+      {
+        "name": "list_topics",
+        "title": "List topics and skill stages",
+        "description": "List every available practice topic (key, Hebrew name, description) and the five skill-tree stages with their level ranges.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "generate_question",
+        "title": "Generate a practice question",
+        "description": "Generate one Hebrew psychometric (quantitative reasoning) practice question for a topic and difficulty level. Returns the question text plus an opaque answer_token to pass to check_answer.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "enum": [
+                "algebra",
+                "multiplication",
+                "powers",
+                "percentages",
+                "wordProblems",
+                "geometry",
+                "probability",
+                "mixed"
+              ],
+              "description": "Topic key. Use list_topics for the catalog. 'mixed' picks adaptively."
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "description": "Difficulty level, 1 (easiest) to 10."
+            }
+          },
+          "required": [
+            "topic",
+            "level"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "generate_practice_set",
+        "title": "Generate a practice set",
+        "description": "Generate a short practice session of several Hebrew psychometric questions, avoiding repeats within the set.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "enum": [
+                "algebra",
+                "multiplication",
+                "powers",
+                "percentages",
+                "wordProblems",
+                "geometry",
+                "probability",
+                "mixed"
+              ],
+              "description": "Topic key, or 'mixed' for a varied set."
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "description": "Difficulty level, 1 to 10."
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "description": "How many questions to generate (1-20)."
+            }
+          },
+          "required": [
+            "topic",
+            "level",
+            "count"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "check_answer",
+        "title": "Check an answer",
+        "description": "Check a user's answer against a question produced by generate_question or generate_practice_set. Returns whether it is correct, the correct answer, and a Hebrew explanation.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "answer_token": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The answer_token returned with the question."
+            },
+            "answer": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The user's answer: a number, or 0/1/2 for compare questions (A/B/equal)."
+            }
+          },
+          "required": [
+            "answer_token",
+            "answer"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
