@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HomeScreen } from "@/components/psychomath/HomeScreen";
 import { PracticeScreen } from "@/components/psychomath/PracticeScreen";
+import { PracticeBoundary } from "@/components/psychomath/PracticeBoundary";
 import { PathScreen } from "@/components/psychomath/PathScreen";
 import { StatsScreen } from "@/components/psychomath/StatsScreen";
 
@@ -68,22 +69,24 @@ function Index() {
         )}
 
         {app.screen === "practice" && app.question && (
-          <PracticeScreen
-            question={app.question}
-            userInput={app.userInput}
-            feedback={app.feedback}
-            streak={app.streak}
-            progressLabel={progressLabel}
-            remainingMs={app.remainingMs}
-            totalMs={app.session.durationMs}
-            levelUp={app.levelUpFlash !== null}
-            onKeypad={app.handleKeypad}
-            onSubmitNumeric={app.submitNumeric}
-            onNext={app.nextQuestion}
-            onBack={() =>
-              app.session.kind === "endless" ? app.goHome() : app.finishSession()
-            }
-          />
+          <PracticeBoundary onReset={app.nextQuestion}>
+            <PracticeScreen
+              question={app.question}
+              userInput={app.userInput}
+              feedback={app.feedback}
+              streak={app.streak}
+              progressLabel={progressLabel}
+              remainingMs={app.remainingMs}
+              totalMs={app.session.durationMs}
+              levelUp={app.levelUpFlash !== null}
+              onKeypad={app.handleKeypad}
+              onSubmitNumeric={app.submitNumeric}
+              onNext={app.nextQuestion}
+              onBack={() =>
+                app.session.kind === "endless" ? app.goHome() : app.finishSession()
+              }
+            />
+          </PracticeBoundary>
         )}
 
         {app.screen === "stats" && (
