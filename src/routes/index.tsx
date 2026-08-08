@@ -79,7 +79,6 @@ function Index() {
             levelUp={app.levelUpFlash !== null}
             onKeypad={app.handleKeypad}
             onSubmitNumeric={app.submitNumeric}
-            onSubmitCompare={app.submitCompare}
             onNext={app.nextQuestion}
             onBack={() =>
               app.session.kind === "endless" ? app.goHome() : app.finishSession()

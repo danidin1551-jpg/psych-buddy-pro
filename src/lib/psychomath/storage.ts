@@ -82,6 +82,11 @@ export function saveMissed(missed: MissedQuestion[]) {
 }
 
 export function clearAll() {
+  pending = {};
+  if (flushTimer !== null) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
   saveStats(defaultStats());
   saveLevels(defaultLevels());
   saveMissed([]);

@@ -50,10 +50,7 @@ export function makeQuestion(topic: CategoryKey | "mixed", level: number, recent
       type_label: q.typeLabel,
       group_label: q.groupLabel,
       text: q.text,
-      answer_format:
-        q.type === "compare"
-          ? "בחירה: 0 = A גדול יותר, 1 = B גדול יותר, 2 = שווים"
-          : "מספר (אפשר עשרוני)",
+      answer_format: "מספר",
       answer_token: encodePayload({
         answer: q.answer,
         explanation: q.explanation,

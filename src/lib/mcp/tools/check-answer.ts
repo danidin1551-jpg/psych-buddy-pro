@@ -12,7 +12,7 @@ export default defineTool({
     answer: z
       .string()
       .min(1)
-      .describe("The user's answer: a number, or 0/1/2 for compare questions (A/B/equal)."),
+      .describe("The user's answer as a number."),
   },
   annotations: { readOnlyHint: true, openWorldHint: false },
   handler: ({ answer_token, answer }) => {
