@@ -13,7 +13,6 @@ interface Props {
   levelUp?: boolean;
   onKeypad: (key: string) => void;
   onSubmitNumeric: () => void;
-  onSubmitCompare: (value: number) => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -41,12 +40,10 @@ export function PracticeScreen({
   levelUp = false,
   onKeypad,
   onSubmitNumeric,
-  onSubmitCompare,
   onNext,
   onBack,
 }: Props) {
 
-  const isCompare = question.type === "compare";
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -66,11 +63,6 @@ export function PracticeScreen({
         }
         return;
       }
-      if (isCompare) {
-        if (e.key.toLowerCase() === "a") onSubmitCompare(0);
-        if (e.key.toLowerCase() === "b") onSubmitCompare(1);
-        return;
-      }
       if (/^[0-9]$/.test(e.key)) onKeypad(e.key);
       else if (e.key === "." || e.key === ",") onKeypad(".");
       else if (e.key === "-") onKeypad("-");
@@ -79,7 +71,7 @@ export function PracticeScreen({
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [feedback, isCompare, onKeypad, onNext, onSubmitCompare, onSubmitNumeric]);
+  }, [feedback, onKeypad, onNext, onSubmitNumeric]);
 
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -183,21 +175,6 @@ export function PracticeScreen({
             className="mt-4 w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             שאלה הבאה
-          </button>
-        </div>
-      ) : isCompare ? (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => onSubmitCompare(0)}
-            className="rounded-2xl border border-border bg-card py-6 text-lg font-bold transition-colors hover:border-primary"
-          >
-            A גדול יותר
-          </button>
-          <button
-            onClick={() => onSubmitCompare(1)}
-            className="rounded-2xl border border-border bg-card py-6 text-lg font-bold transition-colors hover:border-primary"
-          >
-            B גדול יותר
           </button>
         </div>
       ) : (

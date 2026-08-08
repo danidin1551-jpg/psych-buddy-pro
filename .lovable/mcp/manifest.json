@@ -135,7 +135,7 @@
             "answer": {
               "type": "string",
               "minLength": 1,
-              "description": "The user's answer: a number, or 0/1/2 for compare questions (A/B/equal)."
+              "description": "The user's answer as a number."
             }
           },
           "required": [

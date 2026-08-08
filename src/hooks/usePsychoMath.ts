@@ -10,9 +10,8 @@ import {
   loadLevels,
   loadMissed,
   loadStats,
-  saveLevels,
-  saveMissed,
-  saveStats,
+  queueSave,
+  flushSaves,
 } from "@/lib/psychomath/storage";
 import {
   currentStreakValue,
@@ -96,11 +95,15 @@ export function usePsychoMath() {
   const recentRef = useRef<string[]>([]);
   const reviewQueueRef = useRef<Question[]>([]);
   const catStreakRef = useRef<Record<string, { up: number; down: number }>>({});
+  const levelsRef = useRef<LevelMap>(defaultLevels());
+  const streakRef = useRef(0);
   const nextDeltaRef = useRef(0);
 
   useEffect(() => {
     setStats(loadStats());
-    setLevels(loadLevels());
+    const storedLevels = loadLevels();
+    levelsRef.current = storedLevels;
+    setLevels(storedLevels);
     setMissed(loadMissed());
     setDayStreak(loadStreak());
     setMutedState(isMuted());
@@ -162,6 +165,7 @@ export function usePsychoMath() {
     setSession(emptySession("review"));
     setRemainingMs(null);
     setStreak(0);
+    streakRef.current = 0;
     recentRef.current = [];
     nextDeltaRef.current = 0;
     pushQuestion("mixed", levels, stats, "review");
@@ -176,6 +180,7 @@ export function usePsychoMath() {
     setSession(emptySession("fix"));
     setRemainingMs(null);
     setStreak(0);
+    streakRef.current = 0;
     recentRef.current = [];
     nextDeltaRef.current = 0;
     pushQuestion(mode, levels, stats, "fix");
@@ -183,6 +188,7 @@ export function usePsychoMath() {
   }, [session.missed, mode, levels, stats, pushQuestion]);
 
   const finishSession = useCallback(() => {
+    flushSaves();
     playFinish();
     setScreen("summary");
   }, []);
@@ -239,7 +245,7 @@ export function usePsychoMath() {
                 : base.bestTime,
           },
         };
-        saveStats(updated);
+        queueSave({ stats: updated });
         return updated;
       });
 
@@ -257,43 +263,49 @@ export function usePsychoMath() {
       // אחרי שתי טעויות רצופות — השאלה הבאה קלה יותר
       if (!isCorrect && cs.down >= 2) nextDeltaRef.current = -1;
 
+      // החישוב נעשה מחוץ ל-updater כדי שהאפקטים (צליל/פלאש) יופעלו פעם אחת בלבד
+      let leveledUp = false;
       if (cs.up >= 3 || cs.down >= 2) {
-        setLevels((prev) => {
-          const current = prev[cat] ?? 1;
-          const next = cs.up >= 3 ? Math.min(current + 1, 10) : Math.max(current - 1, 1);
-          if (next > current) {
-            playLevelUp();
-            setLevelUpFlash(cat);
-            window.setTimeout(() => setLevelUpFlash(null), 1600);
-            // רמה חדשה מתחילה מהקצה הקל שלה
-            nextDeltaRef.current = -1;
-          }
-          const updated = { ...prev, [cat]: next };
-          saveLevels(updated);
-          return updated;
-        });
+        const current = levelsRef.current[cat] ?? 1;
+        const next = cs.up >= 3 ? Math.min(current + 1, 10) : Math.max(current - 1, 1);
+        if (next !== current) {
+          const updated: LevelMap = { ...levelsRef.current, [cat]: next };
+          levelsRef.current = updated;
+          setLevels(updated);
+          queueSave({ levels: updated });
+        }
+        if (next > current) {
+          leveledUp = true;
+          // רמה חדשה מתחילה מהקצה הקל שלה
+          nextDeltaRef.current = -1;
+        }
         catStreakRef.current[cat] = { up: 0, down: 0 };
       }
 
-      setStreak((prev) => {
-        const next = isCorrect ? prev + 1 : 0;
-        setBestStreak((b) => Math.max(b, next));
-        if (isCorrect) playCorrect(next);
-        else playWrong();
-        return next;
-      });
+      const nextStreak = isCorrect ? streakRef.current + 1 : 0;
+      streakRef.current = nextStreak;
+      setStreak(nextStreak);
+      setBestStreak((b) => Math.max(b, nextStreak));
+
+      if (isCorrect) playCorrect(nextStreak);
+      else playWrong();
+      if (leveledUp) {
+        playLevelUp();
+        setLevelUpFlash(cat);
+        window.setTimeout(() => setLevelUpFlash(null), 1600);
+      }
 
       if (!isCorrect) {
         const entry: MissedQuestion = { question, givenAnswer: given, at: Date.now() };
         setMissed((prev) => {
           const updated = [entry, ...prev.filter((m) => m.question.signature !== question.signature)];
-          saveMissed(updated);
+          queueSave({ missed: updated });
           return updated;
         });
       } else if (session.kind === "review" || session.kind === "fix") {
         setMissed((prev) => {
           const updated = prev.filter((m) => m.question.signature !== question.signature);
-          saveMissed(updated);
+          queueSave({ missed: updated });
           return updated;
         });
       }
@@ -319,14 +331,6 @@ export function usePsychoMath() {
     grade(isAnswerCorrect(userInput, question.answer), userInput);
   }, [question, userInput, feedback, grade]);
 
-  const submitCompare = useCallback(
-    (value: number) => {
-      if (!question || feedback) return;
-      grade(value === question.answer, value === 0 ? "A" : "B");
-    },
-    [question, feedback, grade],
-  );
-
   const handleKeypad = useCallback((key: string) => {
     setUserInput((prev) => {
       if (key === "del") return prev.slice(0, -1);
@@ -341,9 +345,13 @@ export function usePsychoMath() {
     clearAll();
     saveStreak(emptyStreak());
     setStats(defaultStats());
-    setLevels(defaultLevels());
+    const freshLevels = defaultLevels();
+    levelsRef.current = freshLevels;
+    setLevels(freshLevels);
     setMissed([]);
     setBestStreak(0);
+    setStreak(0);
+    streakRef.current = 0;
     setDayStreak(emptyStreak());
     catStreakRef.current = {};
   }, []);
@@ -382,7 +390,6 @@ export function usePsychoMath() {
     nextQuestion,
     finishSession,
     submitNumeric,
-    submitCompare,
     handleKeypad,
     resetStats,
     goHome,
