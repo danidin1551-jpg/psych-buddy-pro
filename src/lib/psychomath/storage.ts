@@ -88,3 +88,41 @@ export function clearAll() {
 }
 
 export type { CategoryKey };
+
+/* ==================== כתיבה מרוכזת ומושהית ==================== */
+
+interface PendingState {
+  stats?: StatsMap;
+  levels?: LevelMap;
+  missed?: MissedQuestion[];
+}
+
+let pending: PendingState = {};
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+let listenersBound = false;
+
+export function flushSaves() {
+  if (flushTimer !== null) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
+  const { stats, levels, missed } = pending;
+  pending = {};
+  if (stats) saveStats(stats);
+  if (levels) saveLevels(levels);
+  if (missed) saveMissed(missed);
+}
+
+/** אוסף שינויים לכתיבה אחת מרוכזת במקום כמה כתיבות סינכרוניות אחרי כל תשובה */
+export function queueSave(partial: PendingState, delay = 400) {
+  pending = { ...pending, ...partial };
+  if (typeof window !== "undefined" && !listenersBound) {
+    listenersBound = true;
+    window.addEventListener("pagehide", flushSaves);
+    window.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flushSaves();
+    });
+  }
+  if (flushTimer !== null) clearTimeout(flushTimer);
+  flushTimer = setTimeout(flushSaves, delay);
+}
