@@ -12,8 +12,9 @@ export type CategoryKey = (typeof CATEGORY_KEYS)[number];
 export type ModeKey = CategoryKey | "mixed";
 
 export interface Question {
-  /** "numeric" expects a typed value, "compare" expects A/B/equal choice */
-  type: "numeric" | "compare";
+  /** תמיד קלט מספרי — פורמט ההשוואה A/B הוסר */
+  type: "numeric";
+
   typeLabel: string;
   groupLabel: string;
   text: string;
