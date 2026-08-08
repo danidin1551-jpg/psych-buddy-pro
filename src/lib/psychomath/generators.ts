@@ -13,52 +13,10 @@ const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.le
 
 /* ============================== אלגברה ============================== */
 
-function generateCompareQuestion(): RawQuestion {
-  const scenario = randInt(0, 3);
-  if (scenario === 0) {
-    return {
-      type: "compare",
-      typeLabel: "התנהגות אלגברית",
-      groupLabel: "אלגברה · אי-שוויונות",
-      text: "נתון ש-x הוא שבר חיובי בין 0 ל-1\n\nA: x²\nB: x",
-      answer: 1,
-      explanation: "שבר בין 0 ל-1 קטן ככל שהחזקה גדלה (למשל ½²=¼<½). לכן B גדול יותר.",
-    };
-  }
-  if (scenario === 1) {
-    return {
-      type: "compare",
-      typeLabel: "התנהגות אלגברית",
-      groupLabel: "אלגברה · אי-שוויונות",
-      text: "נתון ש-x הוא מספר שלם שלילי (x < -1)\n\nA: x²\nB: x",
-      answer: 0,
-      explanation: "מספר שלילי בריבוע הופך לחיובי, בעוד x עצמו נשאר שלילי. לכן A גדול יותר.",
-    };
-  }
-  if (scenario === 2) {
-    return {
-      type: "compare",
-      typeLabel: "התנהגות אלגברית",
-      groupLabel: "אלגברה · אי-שוויונות",
-      text: "נתון ש-x הוא שבר חיובי בין 0 ל-1\n\nA: x\nB: √x",
-      answer: 1,
-      explanation:
-        "עבור שבר בין 0 ל-1, השורש שלו תמיד גדול מהמספר עצמו (למשל √¼=½>¼). לכן B גדול יותר.",
-    };
-  }
-  return {
-    type: "compare",
-    typeLabel: "התנהגות אלגברית",
-    groupLabel: "אלגברה · זהויות",
-    text: "נתון a>0 ו-b>0 (שניהם שונים מאפס)\n\nA: (a+b)²\nB: a² + b²",
-    answer: 0,
-    explanation: "לפי הזהות (a+b)² = a²+2ab+b². מכיוון ש-2ab>0, A תמיד גדול מ-B.",
-  };
-}
-
 function generateAlgebraQuestion(level: number): RawQuestion {
   const roll = Math.random();
-  if (roll < 0.25) {
+  if (roll < 0.34) {
+
     const step = level > 5 ? 5 : 10;
     const multOptions = level <= 3 ? [2, 3] : level <= 7 ? [2, 3, 4] : [2, 3, 4, 5];
     const multiplier = pick(multOptions);
