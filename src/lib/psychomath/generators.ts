@@ -35,7 +35,7 @@ function generateAlgebraQuestion(level: number): RawQuestion {
       explanation: `הפרש א' מהממוצע: ${devA}. הפרש ב' מהממוצע: ${devB}.\nיחס הכמויות הפוך ליחס המרחקים: קבוצה ב' גדולה פי ${devA}/${devB} = ${multiplier} מקבוצה א'.`,
     };
   }
-  if (roll < 0.45) {
+  if (roll < 0.67) {
     const diff = pick([2, 4, 6, 10]);
     const sums = [20, 50, 100, 200, 300];
     const sum = sums[Math.min(Math.floor((level - 1) / 2), sums.length - 1)]!;
@@ -51,23 +51,21 @@ function generateAlgebraQuestion(level: number): RawQuestion {
       explanation: `תבנית הפרש ריבועים: a²-b² = (a-b)(a+b)\n(${a}-${b})(${a}+${b}) = ${diff} × ${sum} = ${answer}`,
     };
   }
-  if (roll < 0.65) {
-    const common = randInt(11, 49);
-    const b = randInt(2, 8);
-    const multiplier = level > 5 ? 20 : 10;
-    const actualC = multiplier - b;
-    const answer = common * multiplier;
-    return {
-      type: "numeric",
-      typeLabel: "זיהוי תבנית: גורם משותף",
-      groupLabel: "אלגברה · חוק הפילוג",
-      text: `${common} × ${b} + ${common} × ${actualC} = ?`,
-      answer,
-      explanation: `הוצאת גורם משותף ${common}:\n${common} × (${b} + ${actualC}) = ${common} × ${multiplier} = ${answer}`,
-    };
-  }
-  return generateCompareQuestion();
+  const common = randInt(11, 49);
+  const b = randInt(2, 8);
+  const multiplier = level > 5 ? 20 : 10;
+  const actualC = multiplier - b;
+  const answer = common * multiplier;
+  return {
+    type: "numeric",
+    typeLabel: "זיהוי תבנית: גורם משותף",
+    groupLabel: "אלגברה · חוק הפילוג",
+    text: `${common} × ${b} + ${common} × ${actualC} = ?`,
+    answer,
+    explanation: `הוצאת גורם משותף ${common}:\n${common} × (${b} + ${actualC}) = ${common} × ${multiplier} = ${answer}`,
+  };
 }
+
 
 /* ============================== כפל ============================== */
 
