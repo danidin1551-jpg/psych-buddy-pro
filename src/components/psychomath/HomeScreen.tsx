@@ -1,6 +1,8 @@
 import { BarChart3, Map, RotateCcw, Sparkles, Timer, Volume2, VolumeX } from "lucide-react";
 import { CATEGORY_META, type ModeKey } from "@/lib/psychomath/types";
 import { StreakCard } from "./StreakCard";
+import { ReminderCard } from "./ReminderCard";
+import type { ReminderPrefs } from "@/lib/psychomath/reminders";
 import type { StreakData } from "@/lib/psychomath/streaks";
 import { SHORT_SESSION_MINUTES, type SessionKind } from "@/hooks/usePsychoMath";
 
@@ -16,6 +18,8 @@ interface Props {
   practicedToday: boolean;
   muted: boolean;
   onToggleMuted: () => void;
+  reminder: ReminderPrefs;
+  onReminderChange: (next: ReminderPrefs) => void;
 }
 
 const ORDER: ModeKey[] = [
@@ -41,6 +45,8 @@ export function HomeScreen({
   practicedToday,
   muted,
   onToggleMuted,
+  reminder,
+  onReminderChange,
 }: Props) {
   return (
     <div className="flex flex-col gap-5 py-2">
@@ -60,6 +66,8 @@ export function HomeScreen({
       </header>
 
       <StreakCard data={dayStreak} value={dayStreakValue} today={practicedToday} />
+
+      <ReminderCard prefs={reminder} onChange={onReminderChange} practicedToday={practicedToday} />
 
       <div className="rounded-2xl border border-[var(--accent-violet)] bg-[color-mix(in_oklch,var(--accent-violet)_12%,var(--card))] p-4">
         <div className="mb-3 flex items-center gap-2">
@@ -139,7 +147,8 @@ export function HomeScreen({
         <div className="flex items-center gap-4">
           <button
             onClick={onToggleMuted}
-            aria-label={muted ? "הפעלת צלילים" : "השתקת צלילים"}
+            aria-label={muted ? "הפעלת צליל ורטט" : "השתקת צליל ורטט"}
+            title={muted ? "הפעלת צליל ורטט" : "השתקת צליל ורטט"}
             className="text-muted-foreground transition-colors hover:text-foreground"
           >
             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
