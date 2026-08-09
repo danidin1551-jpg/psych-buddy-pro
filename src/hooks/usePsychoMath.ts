@@ -24,12 +24,22 @@ import {
 } from "@/lib/psychomath/streaks";
 import {
   isMuted,
-  playCorrect,
-  playFinish,
-  playLevelUp,
-  playWrong,
   setMuted as persistMuted,
 } from "@/lib/psychomath/sound";
+import {
+  feedbackCorrect,
+  feedbackFinish,
+  feedbackLevelUp,
+  feedbackWrong,
+  isConfettiStreak,
+} from "@/lib/psychomath/feedback";
+import {
+  defaultReminder,
+  fireReminder,
+  isDue,
+  loadReminder,
+  type ReminderPrefs,
+} from "@/lib/psychomath/reminders";
 import type {
   CategoryKey,
   LevelMap,
