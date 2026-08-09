@@ -297,10 +297,13 @@ export function usePsychoMath() {
       setStreak(nextStreak);
       setBestStreak((b) => Math.max(b, nextStreak));
 
-      if (isCorrect) playCorrect(nextStreak);
-      else playWrong();
+      if (isCorrect) feedbackCorrect(nextStreak);
+      else feedbackWrong();
+      if (!isCorrect) setComboBroke(true);
+      if (isCorrect && isConfettiStreak(nextStreak)) setConfettiTick((t) => t + 1);
       if (leveledUp) {
-        playLevelUp();
+        feedbackLevelUp();
+        setConfettiTick((t) => t + 1);
         setLevelUpFlash(cat);
         window.setTimeout(() => setLevelUpFlash(null), 1600);
       }
