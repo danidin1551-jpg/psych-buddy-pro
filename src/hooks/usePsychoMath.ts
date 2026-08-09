@@ -111,6 +111,7 @@ export function usePsychoMath() {
   const levelsRef = useRef<LevelMap>(defaultLevels());
   const streakRef = useRef(0);
   const nextDeltaRef = useRef(0);
+  const reminderRef = useRef<ReminderPrefs>(defaultReminder());
 
   useEffect(() => {
     setStats(loadStats());
@@ -120,7 +121,9 @@ export function usePsychoMath() {
     setMissed(loadMissed());
     setDayStreak(loadStreak());
     setMutedState(isMuted());
-    setReminder(loadReminder());
+    const storedReminder = loadReminder();
+    reminderRef.current = storedReminder;
+    setReminder(storedReminder);
     setReady(true);
   }, []);
 
