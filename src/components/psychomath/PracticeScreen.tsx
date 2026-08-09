@@ -36,6 +36,7 @@ export function PracticeScreen({
   userInput,
   feedback,
   streak,
+  comboBroke = false,
   progressLabel,
   remainingMs = null,
   totalMs = null,
