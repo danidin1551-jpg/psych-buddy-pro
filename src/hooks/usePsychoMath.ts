@@ -199,7 +199,8 @@ export function usePsychoMath() {
 
   const finishSession = useCallback(() => {
     flushSaves();
-    playFinish();
+    feedbackFinish();
+    setConfettiTick((t) => t + 1);
     setScreen("summary");
   }, []);
 
