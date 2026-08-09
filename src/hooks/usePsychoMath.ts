@@ -184,6 +184,7 @@ export function usePsychoMath() {
       setQuestion(q);
       setUserInput("");
       setFeedback(null);
+      setComboBroke(false);
       startTimeRef.current = Date.now();
     },
     [],
