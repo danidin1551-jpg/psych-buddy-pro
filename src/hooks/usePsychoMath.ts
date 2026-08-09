@@ -120,8 +120,30 @@ export function usePsychoMath() {
     setMissed(loadMissed());
     setDayStreak(loadStreak());
     setMutedState(isMuted());
+    setReminder(loadReminder());
     setReady(true);
   }, []);
+
+  // בדיקת תזכורת יומית כל דקה, וגם בכל חזרה ללשונית
+  useEffect(() => {
+    if (!ready) return;
+    const check = () => {
+      setReminder((prev) => {
+        if (!isDue(prev, practicedToday(dayStreak))) return prev;
+        return fireReminder(prev) ?? prev;
+      });
+    };
+    check();
+    const id = window.setInterval(check, 60_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [ready, dayStreak]);
 
   const toggleMuted = useCallback(() => {
     setMutedState((prev) => {
