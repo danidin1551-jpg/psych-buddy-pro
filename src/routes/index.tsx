@@ -5,6 +5,7 @@ import { PracticeBoundary } from "@/components/psychomath/PracticeBoundary";
 import { PathScreen } from "@/components/psychomath/PathScreen";
 import { StatsScreen } from "@/components/psychomath/StatsScreen";
 
+import { Confetti } from "@/components/psychomath/Confetti";
 import { SummaryScreen } from "@/components/psychomath/SummaryScreen";
 import { EXAM_LENGTH, usePsychoMath } from "@/hooks/usePsychoMath";
 
@@ -42,6 +43,7 @@ function Index() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-background text-foreground">
+      <Confetti trigger={app.confettiTick} />
       <main className="mx-auto w-full max-w-2xl px-4 pb-16 pt-6">
         {app.screen === "home" && (
           <HomeScreen
@@ -56,6 +58,8 @@ function Index() {
             practicedToday={app.practicedToday}
             muted={app.muted}
             onToggleMuted={app.toggleMuted}
+            reminder={app.reminder}
+            onReminderChange={app.updateReminder}
           />
         )}
 
@@ -75,6 +79,7 @@ function Index() {
               userInput={app.userInput}
               feedback={app.feedback}
               streak={app.streak}
+              comboBroke={app.comboBroke}
               progressLabel={progressLabel}
               remainingMs={app.remainingMs}
               totalMs={app.session.durationMs}

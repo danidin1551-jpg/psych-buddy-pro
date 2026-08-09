@@ -24,12 +24,22 @@ import {
 } from "@/lib/psychomath/streaks";
 import {
   isMuted,
-  playCorrect,
-  playFinish,
-  playLevelUp,
-  playWrong,
   setMuted as persistMuted,
 } from "@/lib/psychomath/sound";
+import {
+  feedbackCorrect,
+  feedbackFinish,
+  feedbackLevelUp,
+  feedbackWrong,
+  isConfettiStreak,
+} from "@/lib/psychomath/feedback";
+import {
+  defaultReminder,
+  fireReminder,
+  isDue,
+  loadReminder,
+  type ReminderPrefs,
+} from "@/lib/psychomath/reminders";
 import type {
   CategoryKey,
   LevelMap,
@@ -89,6 +99,9 @@ export function usePsychoMath() {
   const [muted, setMutedState] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [levelUpFlash, setLevelUpFlash] = useState<CategoryKey | null>(null);
+  const [confettiTick, setConfettiTick] = useState(0);
+  const [comboBroke, setComboBroke] = useState(false);
+  const [reminder, setReminder] = useState<ReminderPrefs>(defaultReminder);
   const [ready, setReady] = useState(false);
 
   const startTimeRef = useRef(0);
@@ -98,6 +111,7 @@ export function usePsychoMath() {
   const levelsRef = useRef<LevelMap>(defaultLevels());
   const streakRef = useRef(0);
   const nextDeltaRef = useRef(0);
+  const reminderRef = useRef<ReminderPrefs>(defaultReminder());
 
   useEffect(() => {
     setStats(loadStats());
@@ -107,7 +121,40 @@ export function usePsychoMath() {
     setMissed(loadMissed());
     setDayStreak(loadStreak());
     setMutedState(isMuted());
+    const storedReminder = loadReminder();
+    reminderRef.current = storedReminder;
+    setReminder(storedReminder);
     setReady(true);
+  }, []);
+
+  // בדיקת תזכורת יומית כל דקה, וגם בכל חזרה ללשונית
+  useEffect(() => {
+    if (!ready) return;
+    // הפעולה נעשית מחוץ ל-updater כדי שההתראה תישלח פעם אחת בלבד
+    const check = () => {
+      const prefs = reminderRef.current;
+      if (!isDue(prefs, practicedToday(dayStreak))) return;
+      const next = fireReminder(prefs);
+      if (next) {
+        reminderRef.current = next;
+        setReminder(next);
+      }
+    };
+    check();
+    const id = window.setInterval(check, 60_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [ready, dayStreak]);
+
+  const updateReminder = useCallback((next: ReminderPrefs) => {
+    reminderRef.current = next;
+    setReminder(next);
   }, []);
 
   const toggleMuted = useCallback(() => {
@@ -137,6 +184,7 @@ export function usePsychoMath() {
       setQuestion(q);
       setUserInput("");
       setFeedback(null);
+      setComboBroke(false);
       startTimeRef.current = Date.now();
     },
     [],
@@ -189,7 +237,8 @@ export function usePsychoMath() {
 
   const finishSession = useCallback(() => {
     flushSaves();
-    playFinish();
+    feedbackFinish();
+    setConfettiTick((t) => t + 1);
     setScreen("summary");
   }, []);
 
@@ -287,10 +336,13 @@ export function usePsychoMath() {
       setStreak(nextStreak);
       setBestStreak((b) => Math.max(b, nextStreak));
 
-      if (isCorrect) playCorrect(nextStreak);
-      else playWrong();
+      if (isCorrect) feedbackCorrect(nextStreak);
+      else feedbackWrong();
+      if (!isCorrect) setComboBroke(true);
+      if (isCorrect && isConfettiStreak(nextStreak)) setConfettiTick((t) => t + 1);
       if (leveledUp) {
-        playLevelUp();
+        feedbackLevelUp();
+        setConfettiTick((t) => t + 1);
         setLevelUpFlash(cat);
         window.setTimeout(() => setLevelUpFlash(null), 1600);
       }
@@ -383,6 +435,10 @@ export function usePsychoMath() {
     toggleMuted,
     remainingMs,
     levelUpFlash,
+    confettiTick,
+    comboBroke,
+    reminder,
+    updateReminder,
     ready,
     startPractice,
     startReview,
