@@ -127,11 +127,15 @@ export function usePsychoMath() {
   // בדיקת תזכורת יומית כל דקה, וגם בכל חזרה ללשונית
   useEffect(() => {
     if (!ready) return;
+    // הפעולה נעשית מחוץ ל-updater כדי שההתראה תישלח פעם אחת בלבד
     const check = () => {
-      setReminder((prev) => {
-        if (!isDue(prev, practicedToday(dayStreak))) return prev;
-        return fireReminder(prev) ?? prev;
-      });
+      const prefs = reminderRef.current;
+      if (!isDue(prefs, practicedToday(dayStreak))) return;
+      const next = fireReminder(prefs);
+      if (next) {
+        reminderRef.current = next;
+        setReminder(next);
+      }
     };
     check();
     const id = window.setInterval(check, 60_000);
@@ -144,6 +148,11 @@ export function usePsychoMath() {
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [ready, dayStreak]);
+
+  const updateReminder = useCallback((next: ReminderPrefs) => {
+    reminderRef.current = next;
+    setReminder(next);
+  }, []);
 
   const toggleMuted = useCallback(() => {
     setMutedState((prev) => {
