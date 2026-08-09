@@ -116,6 +116,8 @@ export function PracticeScreen({
 
       <div className="text-center text-xs text-muted-foreground">{progressLabel}</div>
 
+      <ComboMeter streak={streak} broke={comboBroke} />
+
       {levelUp && (
         <div className="animate-pop rounded-xl border border-[var(--accent-amber)] bg-[color-mix(in_oklch,var(--accent-amber)_14%,var(--card))] p-2 text-center text-xs font-semibold">
           עלית רמה בנושא הזה
@@ -127,7 +129,7 @@ export function PracticeScreen({
         className={`relative flex min-h-[180px] flex-col items-center justify-center overflow-hidden rounded-3xl border bg-card p-6 text-center shadow-xl sm:p-8 ${
           feedback
             ? feedback.isCorrect
-              ? "animate-pop border-[var(--accent-emerald)]"
+              ? `animate-pop border-[var(--accent-emerald)] ${streak >= 3 ? "animate-glow" : ""}`
               : "animate-shake border-destructive"
             : "animate-fade-in border-border"
         }`}
