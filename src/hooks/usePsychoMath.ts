@@ -99,6 +99,9 @@ export function usePsychoMath() {
   const [muted, setMutedState] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [levelUpFlash, setLevelUpFlash] = useState<CategoryKey | null>(null);
+  const [confettiTick, setConfettiTick] = useState(0);
+  const [comboBroke, setComboBroke] = useState(false);
+  const [reminder, setReminder] = useState<ReminderPrefs>(defaultReminder);
   const [ready, setReady] = useState(false);
 
   const startTimeRef = useRef(0);
