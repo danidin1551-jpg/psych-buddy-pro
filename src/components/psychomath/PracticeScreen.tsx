@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Delete, Flame, X } from "lucide-react";
 import type { Question } from "@/lib/psychomath/types";
+import { ComboMeter } from "./ComboMeter";
 
 interface Props {
   question: Question;
   userInput: string;
   feedback: { isCorrect: boolean; elapsed: number; given: string } | null;
   streak: number;
+  comboBroke?: boolean;
   progressLabel: string;
   remainingMs?: number | null;
   totalMs?: number | null;
