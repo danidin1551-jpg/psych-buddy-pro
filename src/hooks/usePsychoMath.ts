@@ -14,6 +14,7 @@ import {
   flushSaves,
 } from "@/lib/psychomath/storage";
 import { loadRecords, saveRecords } from "@/lib/psychomath/storage";
+import { registerReminderWorker } from "@/lib/psychomath/pwa";
 import {
   currentStreakValue,
   emptyStreak,
@@ -85,6 +86,10 @@ const emptySession = (kind: SessionKind, durationMs: number | null = null): Sess
 });
 
 export function usePsychoMath() {
+  useEffect(() => {
+    void registerReminderWorker();
+  }, []);
+
   const [screen, setScreen] = useState<Screen>("home");
   const [mode, setMode] = useState<ModeKey>("mixed");
   const [question, setQuestion] = useState<Question | null>(null);

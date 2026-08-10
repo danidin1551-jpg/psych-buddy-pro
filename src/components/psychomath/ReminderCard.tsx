@@ -84,7 +84,7 @@ export function ReminderCard({ prefs, onChange, practicedToday }: Props) {
               </option>
             ))}
           </select>
-          <span>· התזכורת נשלחת כשהאפליקציה פתוחה או ברקע בדפדפן.</span>
+          <span>· התזכורת נשלחת גם כשהאפליקציה סגורה, בדפדפנים שתומכים בכך; אחרת היא תופיע בפעם הבאה שתפתחי את האפליקציה.</span>
         </div>
       )}
 
