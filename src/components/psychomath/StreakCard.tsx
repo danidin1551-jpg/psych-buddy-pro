@@ -10,15 +10,15 @@ interface Props {
 export function StreakCard({ data, value, today }: Props) {
   const week = lastSevenDays(data);
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-2xl glass border border-border p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span
-            className={`flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_oklch,var(--accent-amber)_18%,transparent)] ${
+            className={`flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_oklch,var(--brand-coral)_18%,transparent)] ${
               today ? "animate-flame" : ""
             }`}
           >
-            <Flame className="h-6 w-6 text-[var(--accent-amber)]" />
+            <Flame className="h-6 w-6 text-[var(--brand-coral)]" />
           </span>
           <div className="flex flex-col">
             <span className="text-lg font-bold leading-tight">
@@ -37,7 +37,7 @@ export function StreakCard({ data, value, today }: Props) {
             <span
               className={`h-2.5 w-full rounded-full ${
                 d.done
-                  ? "bg-[var(--accent-amber)]"
+                  ? "bg-[var(--brand-coral)]"
                   : "bg-[color-mix(in_oklch,var(--muted-foreground)_25%,transparent)]"
               }`}
             />

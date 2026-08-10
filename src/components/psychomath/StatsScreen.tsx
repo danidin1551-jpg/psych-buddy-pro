@@ -42,7 +42,7 @@ export function StatsScreen({ stats, levels, onBack, onReset }: Props) {
             value: totals.attempts ? `${(totals.time / totals.attempts / 1000).toFixed(1)}s` : "—",
           },
         ].map((card) => (
-          <div key={card.label} className="rounded-2xl border border-border bg-card p-3 text-center">
+          <div key={card.label} className="rounded-2xl glass border border-border p-3 text-center">
             <div className="text-xl font-bold">{card.value}</div>
             <div className="text-[11px] text-muted-foreground">{card.label}</div>
           </div>
@@ -58,7 +58,7 @@ export function StatsScreen({ stats, levels, onBack, onReset }: Props) {
             <div
               key={key}
               style={{ "--tile": meta.accent } as React.CSSProperties}
-              className="rounded-2xl border border-border bg-card p-3"
+              className="rounded-2xl glass border border-border p-3"
             >
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="font-semibold text-[var(--tile)]">{meta.name}</span>

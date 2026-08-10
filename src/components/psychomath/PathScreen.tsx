@@ -36,7 +36,7 @@ export function PathScreen({ levels, stats, onStartCategory, onBack }: Props) {
         </button>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="rounded-2xl glass border border-border p-4">
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="text-muted-foreground">התקדמות כוללת</span>
           <span className="font-bold">{total}%</span>
@@ -59,7 +59,7 @@ export function PathScreen({ levels, stats, onStartCategory, onBack }: Props) {
             <div
               key={cat}
               style={{ "--tile": meta.accent } as React.CSSProperties}
-              className="rounded-2xl border border-border bg-card p-4"
+              className="rounded-2xl glass border border-border p-4"
             >
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
