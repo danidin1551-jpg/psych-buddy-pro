@@ -29,3 +29,8 @@ export function hapticLevelUp() {
 export function hapticFinish() {
   buzz([12, 40, 12, 40, 12, 40, 45]);
 }
+
+/** שיא אישי — דפוס ארוך ומובחן */
+export function hapticRecord() {
+  buzz([25, 40, 25, 40, 25, 60, 70]);
+}
