@@ -1,5 +1,5 @@
-import { isMuted, playCorrect, playFinish, playLevelUp, playWrong } from "./sound";
-import { hapticCorrect, hapticFinish, hapticLevelUp, hapticWrong } from "./haptics";
+import { isMuted, playCorrect, playFinish, playLevelUp, playPersonalBest, playWrong } from "./sound";
+import { hapticCorrect, hapticFinish, hapticLevelUp, hapticRecord, hapticWrong } from "./haptics";
 
 /** רמת עוצמה לפי אורך הרצף — משמשת גם לאנימציות */
 export type Intensity = "soft" | "medium" | "high" | "peak";
@@ -9,6 +9,11 @@ export function intensityFor(streak: number): Intensity {
   if (streak >= 5) return "high";
   if (streak >= 3) return "medium";
   return "soft";
+}
+
+/** 0→1 — מזין את המשתנה --combo-intensity שמניע את כדור האורורה */
+export function comboIntensity(streak: number): number {
+  return Math.min(1, streak / 12);
 }
 
 export function prefersReducedMotion(): boolean {
@@ -39,8 +44,14 @@ export function feedbackLevelUp() {
   hapticLevelUp();
 }
 
-export function feedbackFinish() {
+/** סיום סשן — צליל אחר לגמרי כשנשבר שיא אישי */
+export function feedbackFinish(isPersonalBest = false) {
   if (isMuted()) return;
+  if (isPersonalBest) {
+    playPersonalBest();
+    hapticRecord();
+    return;
+  }
   playFinish();
   hapticFinish();
 }
