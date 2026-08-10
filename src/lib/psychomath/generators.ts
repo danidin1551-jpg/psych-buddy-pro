@@ -13,9 +13,31 @@ const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.le
 
 /* ============================== אלגברה ============================== */
 
+/** רמות 1-2: משוואה לינארית בסיסית עם נעלם אחד — מושגית פשוטה בהרבה */
+function generateSimpleAlgebraQuestion(level: number): RawQuestion {
+  const a = randInt(2, level === 1 ? 6 : 9);
+  const x = randInt(2, level === 1 ? 9 : 14);
+  const b = randInt(1, level === 1 ? 12 : 25);
+  const plus = Math.random() < 0.6;
+  const c = plus ? a * x + b : a * x - b;
+  const sign = plus ? "+" : "−";
+  const step = plus ? c - b : c + b;
+  return {
+    type: "numeric",
+    typeLabel: "משוואה לינארית: נעלם אחד",
+    groupLabel: "אלגברה · משוואות",
+    text: `${a}x ${sign} ${b} = ${c}\n\nמה ערך x?`,
+    answer: x,
+    explanation: `מעבירים את ${b} לצד השני: ${a}x = ${step}\nמחלקים ב-${a}: x = ${step} ÷ ${a} = ${x}`,
+  };
+}
+
 function generateAlgebraQuestion(level: number): RawQuestion {
+  // הגרסאות המורכבות (ממוצע משוקלל, כפל מקוצר) נפתחות רק מרמה 3
+  if (level <= 2) return generateSimpleAlgebraQuestion(level);
   const roll = Math.random();
   if (roll < 0.34) {
+
 
     const step = level > 5 ? 5 : 10;
     const multOptions = level <= 3 ? [2, 3] : level <= 7 ? [2, 3, 4] : [2, 3, 4, 5];
