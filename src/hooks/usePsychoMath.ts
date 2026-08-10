@@ -13,6 +13,7 @@ import {
   queueSave,
   flushSaves,
 } from "@/lib/psychomath/storage";
+import { loadRecords, saveRecords } from "@/lib/psychomath/storage";
 import {
   currentStreakValue,
   emptyStreak,
@@ -96,6 +97,8 @@ export function usePsychoMath() {
   const [bestStreak, setBestStreak] = useState(0);
   const bestStreakRef = useRef(0);
   const [session, setSession] = useState<Session>(() => emptySession("endless"));
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
   const [dayStreak, setDayStreak] = useState<StreakData>(emptyStreak);
   const [muted, setMutedState] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
