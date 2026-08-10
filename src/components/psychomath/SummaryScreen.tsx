@@ -28,7 +28,7 @@ export function SummaryScreen({ answered, correct, totalTime, missed, onRestart,
           },
         ].map((c) => (
           <div key={c.label} className="rounded-2xl glass border border-border p-3 text-center">
-            <div className="text-xl font-bold">{c.value}</div>
+            <div className="text-gradient font-mono text-2xl font-bold">{c.value}</div>
             <div className="text-[11px] text-muted-foreground">{c.label}</div>
           </div>
         ))}

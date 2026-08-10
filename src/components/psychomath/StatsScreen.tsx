@@ -1,4 +1,4 @@
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Timer, Trash2 } from "lucide-react";
 import { CATEGORY_KEYS, CATEGORY_META, type StatsMap, type LevelMap } from "@/lib/psychomath/types";
 
 interface Props {
@@ -6,9 +6,10 @@ interface Props {
   levels: LevelMap;
   onBack: () => void;
   onReset: () => void;
+  onStartExam: () => void;
 }
 
-export function StatsScreen({ stats, levels, onBack, onReset }: Props) {
+export function StatsScreen({ stats, levels, onBack, onReset, onStartExam }: Props) {
   const totals = CATEGORY_KEYS.reduce(
     (acc, k) => {
       acc.attempts += stats[k].attempts;
@@ -43,7 +44,7 @@ export function StatsScreen({ stats, levels, onBack, onReset }: Props) {
           },
         ].map((card) => (
           <div key={card.label} className="rounded-2xl glass border border-border p-3 text-center">
-            <div className="text-xl font-bold">{card.value}</div>
+            <div className="font-mono text-xl font-bold">{card.value}</div>
             <div className="text-[11px] text-muted-foreground">{card.label}</div>
           </div>
         ))}
@@ -84,6 +85,13 @@ export function StatsScreen({ stats, levels, onBack, onReset }: Props) {
           );
         })}
       </div>
+
+      <button
+        onClick={onStartExam}
+        className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+      >
+        <Timer className="h-3.5 w-3.5" /> מתקדם: סימולציה מתוזמנת · 10 שאלות
+      </button>
 
       <button
         onClick={onReset}
