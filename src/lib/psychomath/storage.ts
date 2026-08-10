@@ -131,3 +131,30 @@ export function queueSave(partial: PendingState, delay = 400) {
   if (flushTimer !== null) clearTimeout(flushTimer);
   flushTimer = setTimeout(flushSaves, delay);
 }
+
+/* ==================== שיאים אישיים ==================== */
+
+const RECORDS_KEY = "psychomath_records_v1";
+
+export interface Records {
+  /** אחוז הדיוק הטוב ביותר בסשן (מ-5 שאלות ומעלה) */
+  bestAccuracy: number;
+  /** הרצף הארוך ביותר אי פעם */
+  bestStreak: number;
+}
+
+export const defaultRecords = (): Records => ({ bestAccuracy: 0, bestStreak: 0 });
+
+export function loadRecords(): Records {
+  const raw = safeGet(RECORDS_KEY);
+  if (!raw) return defaultRecords();
+  try {
+    return { ...defaultRecords(), ...(JSON.parse(raw) as Partial<Records>) };
+  } catch {
+    return defaultRecords();
+  }
+}
+
+export function saveRecords(records: Records) {
+  safeSet(RECORDS_KEY, JSON.stringify(records));
+}

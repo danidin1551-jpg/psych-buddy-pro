@@ -100,6 +100,7 @@ function Index() {
             levels={app.levels}
             onBack={app.goHome}
             onReset={app.resetStats}
+            onStartExam={() => app.startPractice("mixed", "exam")}
           />
         )}
 

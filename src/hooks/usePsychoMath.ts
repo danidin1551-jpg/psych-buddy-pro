@@ -13,6 +13,8 @@ import {
   queueSave,
   flushSaves,
 } from "@/lib/psychomath/storage";
+import { loadRecords, saveRecords } from "@/lib/psychomath/storage";
+import { registerReminderWorker } from "@/lib/psychomath/pwa";
 import {
   currentStreakValue,
   emptyStreak,
@@ -84,6 +86,10 @@ const emptySession = (kind: SessionKind, durationMs: number | null = null): Sess
 });
 
 export function usePsychoMath() {
+  useEffect(() => {
+    void registerReminderWorker();
+  }, []);
+
   const [screen, setScreen] = useState<Screen>("home");
   const [mode, setMode] = useState<ModeKey>("mixed");
   const [question, setQuestion] = useState<Question | null>(null);
@@ -94,7 +100,10 @@ export function usePsychoMath() {
   const [missed, setMissed] = useState<MissedQuestion[]>([]);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const bestStreakRef = useRef(0);
   const [session, setSession] = useState<Session>(() => emptySession("endless"));
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
   const [dayStreak, setDayStreak] = useState<StreakData>(emptyStreak);
   const [muted, setMutedState] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
@@ -237,7 +246,19 @@ export function usePsychoMath() {
 
   const finishSession = useCallback(() => {
     flushSaves();
-    feedbackFinish();
+    // שיא אישי: דיוק גבוה מכל סשן קודם (מ-5 שאלות ומעלה) או רצף שיא חדש
+    const s = sessionRef.current;
+    const records = loadRecords();
+    const accuracy = s.answered ? (s.correct / s.answered) * 100 : 0;
+    const accuracyRecord = s.answered >= 5 && accuracy > records.bestAccuracy;
+    const streakRecord = bestStreakRef.current > records.bestStreak;
+    if (accuracyRecord || streakRecord) {
+      saveRecords({
+        bestAccuracy: accuracyRecord ? accuracy : records.bestAccuracy,
+        bestStreak: Math.max(records.bestStreak, bestStreakRef.current),
+      });
+    }
+    feedbackFinish(accuracyRecord || streakRecord);
     setConfettiTick((t) => t + 1);
     setScreen("summary");
   }, []);
@@ -335,6 +356,7 @@ export function usePsychoMath() {
       streakRef.current = nextStreak;
       setStreak(nextStreak);
       setBestStreak((b) => Math.max(b, nextStreak));
+      bestStreakRef.current = Math.max(bestStreakRef.current, nextStreak);
 
       if (isCorrect) feedbackCorrect(nextStreak);
       else feedbackWrong();
@@ -402,6 +424,7 @@ export function usePsychoMath() {
     setLevels(freshLevels);
     setMissed([]);
     setBestStreak(0);
+    bestStreakRef.current = 0;
     setStreak(0);
     streakRef.current = 0;
     setDayStreak(emptyStreak());

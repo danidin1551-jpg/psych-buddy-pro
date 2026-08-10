@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, Delete, Flame, X } from "lucide-react";
+import { ArrowLeft, Check, Delete, X } from "lucide-react";
 import type { Question } from "@/lib/psychomath/types";
+import { comboIntensity } from "@/lib/psychomath/feedback";
 import { ComboMeter } from "./ComboMeter";
+import { AuroraOrb } from "./AuroraOrb";
 
 interface Props {
   question: Question;
@@ -19,7 +21,8 @@ interface Props {
   onBack: () => void;
 }
 
-const KEYS = ["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "del"];
+/* התשובות בכל הגנרטורים שלמות — אין מקש נקודה עשרונית */
+const KEYS = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", "del"];
 
 function formatSeconds(ms: number) {
   return (ms / 1000).toFixed(1);
@@ -29,7 +32,6 @@ function formatClock(ms: number) {
   const total = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(total / 60)}:${`${total % 60}`.padStart(2, "0")}`;
 }
-
 
 export function PracticeScreen({
   question,
@@ -46,7 +48,6 @@ export function PracticeScreen({
   onNext,
   onBack,
 }: Props) {
-
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -67,7 +68,6 @@ export function PracticeScreen({
         return;
       }
       if (/^[0-9]$/.test(e.key)) onKeypad(e.key);
-      else if (e.key === "." || e.key === ",") onKeypad(".");
       else if (e.key === "-") onKeypad("-");
       else if (e.key === "Backspace") onKeypad("del");
       else if (e.key === "Enter") onSubmitNumeric();
@@ -79,22 +79,16 @@ export function PracticeScreen({
   return (
     <div className="flex flex-col gap-4 py-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate rounded-full bg-muted px-2.5 py-1 font-mono text-xs text-muted-foreground">
+        <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
           {question.groupLabel}
         </span>
         <div className="flex items-center gap-3 text-xs">
-          {streak > 1 && (
-            <span className="flex items-center gap-1 text-[var(--accent-amber)]">
-              <Flame className="h-3.5 w-3.5" />
-              {streak}
-            </span>
-          )}
           <span className="font-mono text-muted-foreground">
             {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
           </span>
           <button
             onClick={onBack}
-            className="flex items-center gap-1 text-primary transition-colors hover:opacity-80"
+            className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
           >
             חזרה
             <ArrowLeft className="h-4 w-4 rotate-180" />
@@ -107,8 +101,11 @@ export function PracticeScreen({
           <span className="font-mono text-xs text-muted-foreground">{formatClock(remainingMs)}</span>
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-[var(--accent-violet)] transition-[width] duration-200"
-              style={{ width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%` }}
+              className="h-full rounded-full transition-[width] duration-200"
+              style={{
+                width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%`,
+                background: "var(--gradient-trio)",
+              }}
             />
           </div>
         </div>
@@ -119,47 +116,46 @@ export function PracticeScreen({
       <ComboMeter streak={streak} broke={comboBroke} />
 
       {levelUp && (
-        <div className="animate-pop rounded-xl border border-[var(--accent-amber)] bg-[color-mix(in_oklch,var(--accent-amber)_14%,var(--card))] p-2 text-center text-xs font-semibold">
-          עלית רמה בנושא הזה
+        <div className="glass animate-pop gradient-ring rounded-2xl border border-border p-2.5 text-center text-xs font-bold">
+          <span className="text-gradient">עלית רמה בנושא הזה</span>
         </div>
       )}
 
       <div
         key={question.signature + String(Boolean(feedback))}
-        className={`relative flex min-h-[180px] flex-col items-center justify-center overflow-hidden rounded-3xl border bg-card p-6 text-center shadow-xl sm:p-8 ${
+        className={`glass relative flex min-h-[190px] flex-col items-center justify-center overflow-hidden rounded-3xl border p-6 text-center sm:p-8 ${
           feedback
             ? feedback.isCorrect
-              ? `animate-pop border-[var(--accent-emerald)] ${streak >= 3 ? "animate-glow" : ""}`
+              ? `animate-pop border-[var(--brand-lime)] ${streak >= 3 ? "animate-glow" : ""}`
               : "animate-shake border-destructive"
-            : "animate-fade-in border-border"
+            : "gradient-ring border-border"
         }`}
       >
-        <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary">
+        <AuroraOrb intensity={comboIntensity(streak)} />
+
+        <div className="relative mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
           {question.typeLabel}
         </div>
-        <div className="text-xl font-bold leading-relaxed sm:text-2xl">
+        <div className="relative text-xl font-bold leading-relaxed sm:text-2xl">
           {question.text.split("\n").map((line, i) => (
             <div key={i} dir="auto" className="min-h-[0.6em]">
               {line}
             </div>
           ))}
         </div>
-
       </div>
 
       {feedback ? (
         <div
-          className={`animate-fade-in rounded-2xl border p-4 ${
-            feedback.isCorrect
-
-              ? "border-[var(--accent-emerald)] bg-[color-mix(in_oklch,var(--accent-emerald)_12%,var(--card))]"
-              : "border-destructive bg-[color-mix(in_oklch,var(--destructive)_12%,var(--card))]"
+          className={`glass animate-fade-in rounded-3xl border p-4 ${
+            feedback.isCorrect ? "border-[var(--brand-lime)]" : "border-destructive"
           }`}
         >
           <div className="mb-2 flex items-center gap-2 font-bold">
             {feedback.isCorrect ? (
               <>
-                <Check className="h-5 w-5 text-[var(--accent-emerald)]" /> נכון! ({formatSeconds(feedback.elapsed)} שניות)
+                <Check className="h-5 w-5 text-[var(--brand-lime)]" /> נכון! (
+                {formatSeconds(feedback.elapsed)} שניות)
               </>
             ) : (
               <>
@@ -177,7 +173,7 @@ export function PracticeScreen({
 
           <button
             onClick={onNext}
-            className="mt-4 w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-4 w-full rounded-2xl bg-primary py-3 font-bold text-primary-foreground transition-opacity hover:opacity-90"
           >
             שאלה הבאה
           </button>
@@ -186,7 +182,7 @@ export function PracticeScreen({
         <>
           <div
             dir="ltr"
-            className="flex min-h-[64px] w-full items-center justify-center rounded-2xl border border-border bg-muted py-4 text-center font-mono text-3xl font-bold tracking-widest"
+            className="glass flex min-h-[68px] w-full items-center justify-center rounded-2xl border border-border py-4 text-center font-mono text-3xl font-bold tracking-widest"
           >
             {userInput || "\u00A0"}
           </div>
@@ -195,7 +191,9 @@ export function PracticeScreen({
               <button
                 key={k}
                 onClick={() => onKeypad(k)}
-                className="flex h-14 items-center justify-center rounded-xl border border-border bg-card font-mono text-xl transition-colors hover:bg-accent active:scale-95"
+                className={`glass flex h-14 items-center justify-center rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent active:scale-95 ${
+                  k === "0" ? "col-span-2" : ""
+                }`}
                 aria-label={k === "del" ? "מחיקה" : k}
               >
                 {k === "del" ? <Delete className="h-5 w-5" /> : k}
@@ -205,14 +203,15 @@ export function PracticeScreen({
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => onKeypad("-")}
-              className="h-12 rounded-xl border border-border bg-card font-mono text-xl transition-colors hover:bg-accent"
+              className="glass h-12 rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent"
+              aria-label="שינוי סימן"
             >
               ±
             </button>
             <button
               onClick={onSubmitNumeric}
               disabled={userInput.trim() === "" || userInput.trim() === "-"}
-              className="col-span-2 h-12 rounded-xl bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40"
+              className="col-span-2 h-12 rounded-2xl bg-primary font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               בדיקה
             </button>

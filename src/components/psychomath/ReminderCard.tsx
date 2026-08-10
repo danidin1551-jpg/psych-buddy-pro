@@ -41,9 +41,9 @@ export function ReminderCard({ prefs, onChange, practicedToday }: Props) {
   const blocked = permission === "denied" || permission === "unsupported";
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-2xl glass border border-border p-4">
       {!practicedToday && (
-        <p className="mb-3 rounded-xl bg-[color-mix(in_oklch,var(--accent-amber)_14%,var(--card))] px-3 py-2 text-xs text-[var(--accent-amber)]">
+        <p className="mb-3 rounded-xl bg-[color-mix(in_oklch,var(--brand-coral)_14%,var(--card))] px-3 py-2 text-xs text-[var(--brand-coral)]">
           עוד לא תרגלת היום — 3 דקות מספיקות כדי לשמור על הרצף.
         </p>
       )}
@@ -84,7 +84,7 @@ export function ReminderCard({ prefs, onChange, practicedToday }: Props) {
               </option>
             ))}
           </select>
-          <span>· התזכורת נשלחת כשהאפליקציה פתוחה או ברקע בדפדפן.</span>
+          <span>· התזכורת נשלחת גם כשהאפליקציה סגורה, בדפדפנים שתומכים בכך; אחרת היא תופיע בפעם הבאה שתפתחי את האפליקציה.</span>
         </div>
       )}
 

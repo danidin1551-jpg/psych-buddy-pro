@@ -42,59 +42,72 @@ export interface MissedQuestion {
   at: number;
 }
 
+/**
+ * לכל נושא אייקון עגול עם מילוי גרדיאנט משלישיית המותג בלבד
+ * (קורל / ליים / ציאן, ועוד סגול לרגעי שיא) — בלי "רעש" צבעוני שרירותי.
+ */
 export const CATEGORY_META: Record<
   ModeKey,
-  { name: string; description: string; icon: string; accent: string }
+  { name: string; description: string; icon: string; accent: string; gradient: string }
 > = {
   algebra: {
     name: "תבניות אלגבריות",
-    description: "ממוצעים משוקללים, כפל מקוצר, גורם משותף",
+    description: "משוואות, ממוצעים משוקללים וכפל מקוצר",
     icon: "Σ",
-    accent: "var(--accent-indigo)",
+    accent: "var(--brand-violet)",
+    gradient: "linear-gradient(135deg, var(--brand-violet), var(--brand-cyan))",
   },
   multiplication: {
     name: "כפל וחילוק מהיר",
     description: "כפולות דו-ספרתיות בעל פה",
     icon: "×",
-    accent: "var(--accent-sky)",
+    accent: "var(--brand-cyan)",
+    gradient: "linear-gradient(135deg, var(--brand-cyan), var(--brand-lime))",
   },
   powers: {
     name: "חזקות ושורשים",
     description: "ריבועים, שורשים וחזקות שלמות",
     icon: "x²",
-    accent: "var(--accent-amber)",
+    accent: "var(--brand-lime)",
+    gradient: "linear-gradient(135deg, var(--brand-lime), var(--brand-coral))",
   },
   percentages: {
     name: "אחוזים ושברים",
     description: "שינויי אחוזים, המרה משבר לאחוז",
     icon: "%",
-    accent: "var(--accent-emerald)",
+    accent: "var(--brand-coral)",
+    gradient: "linear-gradient(135deg, var(--brand-coral), var(--brand-violet))",
   },
   wordProblems: {
     name: "בעיות מילוליות",
     description: "עבודה, מהירות, תערובות, יחסים",
     icon: "W",
-    accent: "var(--accent-rose)",
+    accent: "var(--brand-cyan)",
+    gradient: "linear-gradient(135deg, var(--brand-cyan), var(--brand-coral))",
   },
   geometry: {
     name: "גיאומטריה",
     description: "משולשים, שטחים והיקפים",
     icon: "△",
-    accent: "var(--accent-teal)",
+    accent: "var(--brand-violet)",
+    gradient: "linear-gradient(135deg, var(--brand-violet), var(--brand-lime))",
   },
   probability: {
     name: "הסתברות וקומבינטוריקה",
     description: "סיכויים, סידורים וצירופים",
     icon: "P",
-    accent: "var(--accent-fuchsia)",
+    accent: "var(--brand-coral)",
+    gradient: "linear-gradient(135deg, var(--brand-coral), var(--brand-lime))",
   },
   mixed: {
     name: "אימון אדפטיבי",
     description: "מתמקד אוטומטית בנושאים בהם הדיוק שלך נמוך יותר",
     icon: "⚡",
-    accent: "var(--accent-violet)",
+    accent: "var(--brand-cyan)",
+    gradient: "var(--gradient-trio)",
   },
 };
+
 
 export const CATEGORY_NAMES = Object.fromEntries(
   CATEGORY_KEYS.map((k) => [k, CATEGORY_META[k].name]),

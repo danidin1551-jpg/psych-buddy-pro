@@ -36,7 +36,7 @@ export class PracticeBoundary extends Component<Props, State> {
         </p>
         <button
           onClick={this.handleReset}
-          className="rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:opacity-90"
         >
           נסי שוב
         </button>

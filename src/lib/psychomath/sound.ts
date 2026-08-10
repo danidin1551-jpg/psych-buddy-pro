@@ -50,11 +50,18 @@ function tone(freq: number, start: number, duration: number, gain = 0.06, type: 
   osc.stop(ac.currentTime + start + duration + 0.02);
 }
 
+/**
+ * מדרגות הפיץ' מיושרות למדרגות הרטט ב-haptics.ts:
+ * 1-2 · 3-4 · 5-9 · 10+
+ */
 export function playCorrect(streak = 1) {
   if (muted) return;
   const boost = Math.min(streak, 5) - 1;
-  tone(660 + boost * 40, 0, 0.12);
-  tone(880 + boost * 55, 0.09, 0.16);
+  // מדרגה נוספת מרצף 10 ומעלה — מתאימה לרטט החזק יותר
+  const peak = streak >= 10 ? 1 : 0;
+  tone(660 + boost * 40 + peak * 120, 0, 0.12);
+  tone(880 + boost * 55 + peak * 160, 0.09, 0.16);
+  if (peak) tone(1320, 0.18, 0.14, 0.045);
 }
 
 export function playWrong() {
@@ -63,12 +70,22 @@ export function playWrong() {
   tone(180, 0.1, 0.2, 0.04, "triangle");
 }
 
+/** סיום סשן רגיל — ארפג' עולה נקי */
 export function playFinish() {
   if (muted) return;
   [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.09, 0.22, 0.05));
 }
 
+/** עליית רמה — שני צלילי triangle קצרים */
 export function playLevelUp() {
   if (muted) return;
   [587, 880].forEach((f, i) => tone(f, i * 0.1, 0.2, 0.05, "triangle"));
+}
+
+/** שיא אישי — פנפרה רחבה עם אקורד מחזיק, מובחנת משני האחרים */
+export function playPersonalBest() {
+  if (muted) return;
+  [784, 988, 1175].forEach((f, i) => tone(f, i * 0.07, 0.18, 0.045, "square"));
+  [523, 659, 784, 1046].forEach((f) => tone(f, 0.26, 0.75, 0.035, "sine"));
+  tone(1568, 0.34, 0.5, 0.03, "triangle");
 }

@@ -7,9 +7,9 @@ interface Props {
 }
 
 const COLORS = [
-  "var(--accent-amber)",
-  "var(--accent-emerald)",
-  "var(--accent-violet)",
+  "var(--brand-coral)",
+  "var(--brand-lime)",
+  "var(--brand-violet)",
   "var(--primary)",
 ];
 

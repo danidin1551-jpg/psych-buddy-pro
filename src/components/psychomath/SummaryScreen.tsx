@@ -27,8 +27,8 @@ export function SummaryScreen({ answered, correct, totalTime, missed, onRestart,
             value: answered ? `${(totalTime / answered / 1000).toFixed(1)}s` : "—",
           },
         ].map((c) => (
-          <div key={c.label} className="rounded-2xl border border-border bg-card p-3 text-center">
-            <div className="text-xl font-bold">{c.value}</div>
+          <div key={c.label} className="rounded-2xl glass border border-border p-3 text-center">
+            <div className="text-gradient font-mono text-2xl font-bold">{c.value}</div>
             <div className="text-[11px] text-muted-foreground">{c.label}</div>
           </div>
         ))}
@@ -37,7 +37,7 @@ export function SummaryScreen({ answered, correct, totalTime, missed, onRestart,
       {missed.length > 0 && onFixRound && (
         <button
           onClick={onFixRound}
-          className="animate-pop flex items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="animate-pop flex items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90"
         >
           <Wrench className="h-4 w-4" /> סבב תיקון על {missed.length} הטעויות
         </button>
@@ -50,7 +50,7 @@ export function SummaryScreen({ answered, correct, totalTime, missed, onRestart,
           </h3>
           {missed.map((m, i) => (
 
-            <div key={i} className="rounded-2xl border border-border bg-card p-3 text-sm">
+            <div key={i} className="rounded-2xl glass border border-border p-3 text-sm">
               <div className="mb-1 whitespace-pre-line font-medium">{m.question.text}</div>
               <div className="text-xs text-muted-foreground">
                 תשובתך: {m.givenAnswer || "—"} · התשובה הנכונה: {m.question.answer}
@@ -64,21 +64,21 @@ export function SummaryScreen({ answered, correct, totalTime, missed, onRestart,
       )}
 
       {missed.length === 0 && answered > 0 && (
-        <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--accent-emerald)] bg-[color-mix(in_oklch,var(--accent-emerald)_12%,var(--card))] p-4 text-sm font-semibold">
-          <Check className="h-4 w-4 text-[var(--accent-emerald)]" /> סבב מושלם, בלי טעויות!
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--brand-lime)] bg-[color-mix(in_oklch,var(--brand-lime)_12%,var(--card))] p-4 text-sm font-semibold">
+          <Check className="h-4 w-4 text-[var(--brand-lime)]" /> סבב מושלם, בלי טעויות!
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={onRestart}
-          className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 font-semibold text-primary-foreground transition-colors hover:opacity-90"
         >
           <RotateCcw className="h-4 w-4" /> סבב נוסף
         </button>
         <button
           onClick={onHome}
-          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 transition-colors hover:bg-accent"
+          className="flex items-center justify-center gap-2 rounded-xl glass border border-border py-3 transition-colors hover:bg-accent"
         >
           <Home className="h-4 w-4" /> למסך הבית
         </button>

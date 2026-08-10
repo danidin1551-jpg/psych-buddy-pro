@@ -5,17 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * מערכת עיצוב: "Apple, אבל צבעוני וחי".
+ * רקע שחור אמיתי, כרטיסי זכוכית, ושלישיית גרדיאנט חיה.
+ * כל הצבעים ב-oklch. אין להשתמש בצבעים קשיחים בקומפוננטות.
  */
 
 @theme inline {
@@ -26,6 +18,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --font-sans: "Assistant", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -46,6 +40,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-coral: var(--brand-coral);
+  --color-lime: var(--brand-lime);
+  --color-cyan: var(--brand-cyan);
+  --color-violet: var(--brand-violet);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -62,85 +60,65 @@
 }
 
 :root {
-  --radius: 0.875rem;
-  --background: oklch(0.17 0.03 265);
-  --foreground: oklch(0.97 0.005 250);
-  --card: oklch(0.23 0.032 264);
-  --card-foreground: oklch(0.97 0.005 250);
-  --popover: oklch(0.23 0.032 264);
-  --popover-foreground: oklch(0.97 0.005 250);
-  --primary: oklch(0.63 0.19 274);
-  --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.28 0.035 264);
-  --secondary-foreground: oklch(0.97 0.005 250);
-  --muted: oklch(0.27 0.03 264);
-  --muted-foreground: oklch(0.72 0.025 258);
-  --accent: oklch(0.31 0.04 266);
-  --accent-foreground: oklch(0.97 0.005 250);
-  --destructive: oklch(0.65 0.2 22);
-  --destructive-foreground: oklch(0.98 0.005 250);
-  --border: oklch(0.33 0.03 264);
-  --input: oklch(0.33 0.03 264);
-  --ring: oklch(0.63 0.19 274);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.2 0.03 265);
-  --sidebar-foreground: oklch(0.97 0.005 250);
-  --sidebar-primary: oklch(0.63 0.19 274);
-  --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.31 0.04 266);
-  --sidebar-accent-foreground: oklch(0.97 0.005 250);
-  --sidebar-border: oklch(0.33 0.03 264);
-  --sidebar-ring: oklch(0.63 0.19 274);
+  --radius: 1.25rem;
 
-  /* מבטאי צבע לנושאי התרגול */
-  --accent-indigo: oklch(0.72 0.16 274);
-  --accent-sky: oklch(0.76 0.13 231);
-  --accent-amber: oklch(0.82 0.15 82);
-  --accent-emerald: oklch(0.76 0.15 163);
-  --accent-rose: oklch(0.74 0.16 15);
-  --accent-teal: oklch(0.76 0.12 190);
-  --accent-fuchsia: oklch(0.75 0.18 330);
-  --accent-violet: oklch(0.7 0.19 296);
+  /* שלישיית המותג + סגול לרגעי שיא */
+  --brand-coral: oklch(0.658 0.232 16);
+  --brand-lime: oklch(0.917 0.226 129);
+  --brand-cyan: oklch(0.789 0.125 205);
+  --brand-violet: oklch(0.599 0.23 286);
+
+  --background: oklch(0.115 0 0);
+  --foreground: oklch(0.971 0.003 286);
+  /* כרטיסי זכוכית — רקע שקוף, לא אטום */
+  --card: oklch(1 0 0 / 6%);
+  --card-foreground: oklch(0.971 0.003 286);
+  --popover: oklch(0.16 0 0);
+  --popover-foreground: oklch(0.971 0.003 286);
+  --primary: oklch(0.789 0.125 205);
+  --primary-foreground: oklch(0.14 0 0);
+  --secondary: oklch(1 0 0 / 8%);
+  --secondary-foreground: oklch(0.971 0.003 286);
+  --muted: oklch(1 0 0 / 8%);
+  /* ניגודיות AA מול הרקע השחור והזכוכית */
+  --muted-foreground: oklch(0.78 0.005 286);
+  --accent: oklch(1 0 0 / 12%);
+  --accent-foreground: oklch(0.971 0.003 286);
+  --destructive: oklch(0.658 0.232 16);
+  --destructive-foreground: oklch(0.14 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.789 0.125 205);
+  --chart-1: var(--brand-coral);
+  --chart-2: var(--brand-lime);
+  --chart-3: var(--brand-cyan);
+  --chart-4: var(--brand-violet);
+  --chart-5: oklch(0.85 0.16 90);
+  --sidebar: oklch(0.13 0 0);
+  --sidebar-foreground: oklch(0.971 0.003 286);
+  --sidebar-primary: var(--brand-cyan);
+  --sidebar-primary-foreground: oklch(0.14 0 0);
+  --sidebar-accent: oklch(1 0 0 / 10%);
+  --sidebar-accent-foreground: oklch(0.971 0.003 286);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--brand-cyan);
+
+  /* עוצמת הקומבו: 0 במנוחה, 1 בשיא — נשלט מ-React */
+  --combo-intensity: 0;
+  --aurora-duration: calc(58s - (var(--combo-intensity) * 40s));
+  --aurora-saturation: calc(1 + (var(--combo-intensity) * 0.9));
+
+  --gradient-trio: linear-gradient(
+    120deg,
+    var(--brand-coral) 0%,
+    var(--brand-violet) 35%,
+    var(--brand-cyan) 68%,
+    var(--brand-lime) 100%
+  );
 }
 
-
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  color-scheme: dark;
 }
 
 @layer base {
@@ -148,11 +126,112 @@
     border-color: var(--color-border);
   }
 
+  html {
+    color-scheme: dark;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 }
+
+/* ==================== זכוכית ==================== */
+
+@utility glass {
+  background: color-mix(in oklch, oklch(1 0 0) 6%, transparent);
+  backdrop-filter: blur(28px) saturate(150%);
+}
+
+@utility glass-strong {
+  background: color-mix(in oklch, oklch(1 0 0) 10%, transparent);
+  backdrop-filter: blur(32px) saturate(160%);
+}
+
+/* ==================== טקסט גרדיאנט ==================== */
+
+@utility text-gradient {
+  background-image: var(--gradient-trio);
+  background-size: 200% 200%;
+  background-clip: text;
+  color: transparent;
+  animation: pm-gradient-pan 12s ease-in-out infinite;
+}
+
+@keyframes pm-gradient-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ==================== כדור אורורה ==================== */
+
+@keyframes pm-aurora-spin {
+  from { transform: rotate(0deg) scale(1.25); }
+  to { transform: rotate(360deg) scale(1.25); }
+}
+
+@keyframes pm-aurora-hue {
+  from { filter: blur(42px) saturate(var(--aurora-saturation)) hue-rotate(0deg); }
+  to { filter: blur(42px) saturate(var(--aurora-saturation)) hue-rotate(360deg); }
+}
+
+@keyframes pm-aurora-drift {
+  0%, 100% { transform: translate3d(-6%, -4%, 0) scale(1.1); }
+  33% { transform: translate3d(8%, 6%, 0) scale(1.25); }
+  66% { transform: translate3d(-4%, 8%, 0) scale(1.15); }
+}
+
+@utility aurora-orb {
+  position: absolute;
+  inset: -35%;
+  pointer-events: none;
+  border-radius: 9999px;
+  opacity: calc(0.42 + (var(--combo-intensity) * 0.38));
+  background:
+    radial-gradient(38% 42% at 30% 32%, var(--brand-violet) 0%, transparent 62%),
+    radial-gradient(42% 44% at 70% 38%, var(--brand-cyan) 0%, transparent 64%),
+    radial-gradient(44% 46% at 55% 74%, var(--brand-coral) 0%, transparent 66%),
+    radial-gradient(36% 38% at 26% 76%, var(--brand-lime) 0%, transparent 62%);
+  filter: blur(42px) saturate(var(--aurora-saturation));
+  animation:
+    pm-aurora-hue var(--aurora-duration) linear infinite,
+    pm-aurora-drift calc(var(--aurora-duration) * 0.7) ease-in-out infinite;
+}
+
+/* ==================== מסגרת גרדיאנט נעה ==================== */
+
+@keyframes pm-border-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@utility gradient-ring {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-trio);
+    background-size: 260% 260%;
+    animation: pm-border-pan 14s ease-in-out infinite;
+    -webkit-mask:
+      linear-gradient(oklch(1 0 0) 0 0) content-box,
+      linear-gradient(oklch(1 0 0) 0 0);
+    mask:
+      linear-gradient(oklch(1 0 0) 0 0) content-box,
+      linear-gradient(oklch(1 0 0) 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+}
+
+/* ==================== אנימציות משוב ==================== */
 
 @keyframes pm-shake {
   0%, 100% { transform: translateX(0); }
@@ -195,21 +274,32 @@
 }
 
 @keyframes pm-glow {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent-emerald) 40%, transparent); }
-  50% { box-shadow: 0 0 22px 4px color-mix(in oklch, var(--accent-emerald) 35%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--brand-lime) 40%, transparent); }
+  50% { box-shadow: 0 0 26px 5px color-mix(in oklch, var(--brand-lime) 32%, transparent); }
 }
 
 @utility animate-glow {
   animation: pm-glow 0.6s ease-out;
 }
 
+/* ==================== כיבוד "פחות תנועה" ==================== */
+
 @media (prefers-reduced-motion: reduce) {
   .animate-shake,
   .animate-pop,
   .animate-flame,
   .animate-confetti,
-  .animate-glow {
+  .animate-glow,
+  .text-gradient,
+  .gradient-ring::before,
+  .aurora-orb {
+    /* נשארים צבעוניים — רק בלי תנועה */
     animation: none !important;
   }
-}
 
+  .aurora-orb {
+    filter: blur(44px) saturate(1.25);
+    opacity: 0.5;
+    transform: none;
+  }
+}
