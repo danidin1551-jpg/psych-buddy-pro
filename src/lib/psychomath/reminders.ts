@@ -1,4 +1,5 @@
 import { dayKey } from "./streaks";
+import { getReminderWorker, postToWorker, registerPeriodicReminder, registerReminderWorker } from "./pwa";
 
 const KEY = "psychomath_reminder_v1";
 
@@ -51,7 +52,12 @@ export function notificationPermission(): NotificationPermission | "unsupported"
 export async function requestNotificationPermission(): Promise<NotificationPermission | "unsupported"> {
   if (!notificationsSupported()) return "unsupported";
   try {
-    return await Notification.requestPermission();
+    const result = await Notification.requestPermission();
+    if (result === "granted") {
+      await registerReminderWorker();
+      await registerPeriodicReminder();
+    }
+    return result;
   } catch {
     return Notification.permission;
   }
@@ -59,6 +65,20 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 
 export function formatTime(hour: number, minute: number) {
   return `${`${hour}`.padStart(2, "0")}:${`${minute}`.padStart(2, "0")}`;
+}
+
+/** מסנכרן את ההעדפות אל ה-Service Worker כדי שיוכל להתריע גם כשהאפליקציה סגורה */
+export function syncReminderToWorker(prefs: ReminderPrefs, practicedTodayFlag: boolean) {
+  void postToWorker({
+    type: "reminder:prefs",
+    prefs: {
+      enabled: prefs.enabled,
+      hour: prefs.hour,
+      minute: prefs.minute,
+      lastNotified: prefs.lastNotified,
+      practicedDay: practicedTodayFlag ? dayKey() : null,
+    },
+  });
 }
 
 /** האם הגיע הזמן לשלוח תזכורת היום */
@@ -69,17 +89,37 @@ export function isDue(prefs: ReminderPrefs, practicedTodayFlag: boolean, now = n
   return minutesNow >= prefs.hour * 60 + prefs.minute;
 }
 
-/** שולח את התזכורת ומחזיר את ההעדפות המעודכנות (או null אם לא נשלח) */
+/**
+ * שולח את התזכורת ומחזיר את ההעדפות המעודכנות (או null אם לא נשלח).
+ * מנסה קודם דרך ה-Service Worker (עובד גם ברקע), ונופל להתראה רגילה מהעמוד.
+ */
 export function fireReminder(prefs: ReminderPrefs): ReminderPrefs | null {
   if (notificationPermission() !== "granted") return null;
-  try {
-    new Notification("זמן למנה קצרה 🧠", {
-      body: "3 דקות תרגול היום ישמרו על הרצף שלך.",
-      tag: "psychomath-daily",
-    });
-  } catch {
-    return null;
-  }
+  const body = "3 דקות תרגול היום ישמרו על הרצף שלך.";
+  const title = "זמן למנה קצרה 🧠";
+  void (async () => {
+    const reg = await getReminderWorker();
+    if (reg) {
+      try {
+        await reg.showNotification(title, {
+          body,
+          tag: "psychomath-daily",
+          dir: "rtl",
+          lang: "he",
+          icon: "/icons/icon-192.png",
+          badge: "/icons/icon-192.png",
+        });
+        return;
+      } catch {
+        /* נופלים להתראה רגילה */
+      }
+    }
+    try {
+      new Notification(title, { body, tag: "psychomath-daily" });
+    } catch {
+      /* חסום */
+    }
+  })();
   const next = { ...prefs, lastNotified: dayKey() };
   saveReminder(next);
   return next;
