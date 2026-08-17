@@ -40,6 +40,20 @@ export interface MissedQuestion {
   question: Question;
   givenAnswer: string;
   at: number;
+  /**
+   * מתי השאלה זמינה לחזרה הבאה (timestamp).
+   * undefined = זמינה עכשיו (תאימות לאחור לנתונים ישנים).
+   */
+  nextReviewAt?: number;
+  /** המרווח הנוכחי בימים */
+  intervalDays?: number;
+  /** כמה פעמים נכשלה ברצף, כולל אחרי חזרות */
+  failCount?: number;
+}
+
+/** תאימות לאחור: רשומה בלי nextReviewAt נחשבת זמינה תמיד */
+export function isDueForReview(m: MissedQuestion, now = Date.now()): boolean {
+  return m.nextReviewAt === undefined || m.nextReviewAt <= now;
 }
 
 /**
