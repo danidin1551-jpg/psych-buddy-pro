@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Delete, X } from "lucide-react";
 import type { Question } from "@/lib/psychomath/types";
+import { timeTargetSeconds } from "@/lib/psychomath/pacing";
 import { comboIntensity } from "@/lib/psychomath/feedback";
 import { ComboMeter } from "./ComboMeter";
 import { AuroraOrb } from "./AuroraOrb";
+
 
 interface Props {
   question: Question;
@@ -49,6 +51,15 @@ export function PracticeScreen({
   onBack,
 }: Props) {
   const [elapsed, setElapsed] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const listener = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
 
   useEffect(() => {
     if (feedback) return;
@@ -57,6 +68,7 @@ export function PracticeScreen({
     const id = window.setInterval(() => setElapsed(Date.now() - started), 100);
     return () => window.clearInterval(id);
   }, [question.signature, feedback]);
+
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -76,16 +88,27 @@ export function PracticeScreen({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [feedback, onKeypad, onNext, onSubmitNumeric]);
 
+  const targetMs = timeTargetSeconds(question.typeLabel) * 1000;
+  const isOverTarget = !feedback && elapsed > targetMs;
+
   return (
     <div className="flex flex-col gap-4 py-2">
+
       <div className="flex items-center justify-between gap-2">
         <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
           {question.groupLabel}
         </span>
         <div className="flex items-center gap-3 text-xs">
-          <span className="font-mono text-muted-foreground">
+          <span
+            className="font-mono text-sm tabular-nums transition-colors duration-1000"
+            style={{
+              color: isOverTarget ? "var(--brand-coral)" : "var(--muted-foreground)",
+              transition: reducedMotion ? "none" : "color 1.5s ease",
+            }}
+          >
             {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
           </span>
+
           <button
             onClick={onBack}
             className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
