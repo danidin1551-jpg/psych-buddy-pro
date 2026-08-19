@@ -51,6 +51,15 @@ export function PracticeScreen({
   onBack,
 }: Props) {
   const [elapsed, setElapsed] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const listener = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
 
   useEffect(() => {
     if (feedback) return;
@@ -59,6 +68,7 @@ export function PracticeScreen({
     const id = window.setInterval(() => setElapsed(Date.now() - started), 100);
     return () => window.clearInterval(id);
   }, [question.signature, feedback]);
+
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
