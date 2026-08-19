@@ -99,9 +99,16 @@ export function PracticeScreen({
           {question.groupLabel}
         </span>
         <div className="flex items-center gap-3 text-xs">
-          <span className="font-mono text-muted-foreground">
+          <span
+            className="font-mono text-sm tabular-nums transition-colors duration-1000"
+            style={{
+              color: isOverTarget ? "var(--brand-coral)" : "var(--muted-foreground)",
+              transition: reducedMotion ? "none" : "color 1.5s ease",
+            }}
+          >
             {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
           </span>
+
           <button
             onClick={onBack}
             className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
