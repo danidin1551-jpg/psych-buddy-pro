@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Delete, X } from "lucide-react";
 import type { Question } from "@/lib/psychomath/types";
+import { timeTargetSeconds } from "@/lib/psychomath/pacing";
 import { comboIntensity } from "@/lib/psychomath/feedback";
 import { ComboMeter } from "./ComboMeter";
 import { AuroraOrb } from "./AuroraOrb";
+
 
 interface Props {
   question: Question;
