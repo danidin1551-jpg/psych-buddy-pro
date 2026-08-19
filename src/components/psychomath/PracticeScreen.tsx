@@ -91,6 +91,17 @@ export function PracticeScreen({
   const targetMs = timeTargetSeconds(question.typeLabel) * 1000;
   const isOverTarget = !feedback && elapsed > targetMs;
 
+  /* גובה הכרטיס קבוע — מקטינים טקסט לשאלות ארוכות כדי להימנע מגלילה */
+  const textLength = question.text.length;
+  const questionTextSize =
+    textLength > 190
+      ? "text-sm sm:text-base"
+      : textLength > 120
+        ? "text-base sm:text-lg"
+        : textLength > 70
+          ? "text-lg sm:text-xl"
+          : "text-xl sm:text-2xl";
+
   return (
     <div className="flex flex-col gap-4 py-2">
 
@@ -146,7 +157,7 @@ export function PracticeScreen({
 
       <div
         key={question.signature + String(Boolean(feedback))}
-        className={`glass relative flex min-h-[190px] flex-col items-center justify-center overflow-hidden rounded-3xl border p-6 text-center sm:p-8 ${
+        className={`glass relative h-[230px] overflow-hidden rounded-3xl border text-center sm:h-[260px] ${
           feedback
             ? feedback.isCorrect
               ? `animate-pop border-[var(--brand-lime)] ${streak >= 3 ? "animate-glow" : ""}`
@@ -156,15 +167,17 @@ export function PracticeScreen({
       >
         <AuroraOrb intensity={comboIntensity(streak)} />
 
-        <div className="relative mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
-          {question.typeLabel}
-        </div>
-        <div className="relative text-xl font-bold leading-relaxed sm:text-2xl">
-          {question.text.split("\n").map((line, i) => (
-            <div key={i} dir="auto" className="min-h-[0.6em]">
-              {line}
-            </div>
-          ))}
+        <div className="relative flex h-full flex-col items-center justify-center overflow-y-auto p-6 sm:p-8">
+          <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
+            {question.typeLabel}
+          </div>
+          <div className={`font-bold leading-relaxed ${questionTextSize}`}>
+            {question.text.split("\n").map((line, i) => (
+              <div key={i} dir="auto" className="min-h-[0.6em]">
+                {line}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
