@@ -88,8 +88,12 @@ export function PracticeScreen({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [feedback, onKeypad, onNext, onSubmitNumeric]);
 
+  const targetMs = timeTargetSeconds(question.typeLabel) * 1000;
+  const isOverTarget = !feedback && elapsed > targetMs;
+
   return (
     <div className="flex flex-col gap-4 py-2">
+
       <div className="flex items-center justify-between gap-2">
         <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
           {question.groupLabel}
