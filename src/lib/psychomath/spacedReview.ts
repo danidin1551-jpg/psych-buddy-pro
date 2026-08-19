@@ -8,11 +8,12 @@ const SCHEDULE = [1, 3, 7, 21, 45];
 function nextIntervalDays(currentDays: number): number {
   const idx = SCHEDULE.indexOf(currentDays);
   if (idx !== -1 && idx < SCHEDULE.length - 1) {
-    return SCHEDULE[idx + 1];
+    return SCHEDULE[idx + 1]!;
   }
   // מעבר 45 יום → מכפיל קבוע ~2.5
   return Math.round(currentDays * 2.5);
 }
+
 
 export interface NextIntervalResult {
   intervalDays: number;
