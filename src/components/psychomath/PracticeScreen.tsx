@@ -35,6 +35,13 @@ function formatClock(ms: number) {
   return `${Math.floor(total / 60)}:${`${total % 60}`.padStart(2, "0")}`;
 }
 
+/* גודל גופן מתכווץ לתשובות ארוכות כדי שלא יגלשו לשורה שנייה */
+function answerTextSize(length: number) {
+  if (length > 7) return "text-xl";
+  if (length > 5) return "text-2xl";
+  return "text-3xl";
+}
+
 export function PracticeScreen({
   question,
   userInput,
@@ -103,157 +110,170 @@ export function PracticeScreen({
           : "text-xl sm:text-2xl";
 
   return (
-    <div className="flex flex-col gap-4 py-2">
+    <>
+      {/* אזור גלילה: כל מה שמעל המקלדת. pb גדול כדי שהתוכן לא יוסתר מאחורי הסרגל הקבוע */}
+      <div className="flex flex-col gap-4 py-2 pb-[280px]">
 
-      <div className="flex items-center justify-between gap-2">
-        <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-          {question.groupLabel}
-        </span>
-        <div className="flex items-center gap-3 text-xs">
-          <span
-            className="font-mono text-sm tabular-nums transition-colors duration-1000"
-            style={{
-              color: isOverTarget ? "var(--brand-coral)" : "var(--muted-foreground)",
-              transition: reducedMotion ? "none" : "color 1.5s ease",
-            }}
-          >
-            {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
+        <div className="flex items-center justify-between gap-2">
+          <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+            {question.groupLabel}
           </span>
-
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
-          >
-            חזרה
-            <ArrowLeft className="h-4 w-4 rotate-180" />
-          </button>
-        </div>
-      </div>
-
-      {remainingMs !== null && (
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-muted-foreground">{formatClock(remainingMs)}</span>
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full transition-[width] duration-200"
+          <div className="flex items-center gap-3 text-xs">
+            <span
+              className="font-mono text-sm tabular-nums transition-colors duration-1000"
               style={{
-                width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%`,
-                background: "var(--gradient-trio)",
+                color: isOverTarget ? "var(--brand-coral)" : "var(--muted-foreground)",
+                transition: reducedMotion ? "none" : "color 1.5s ease",
               }}
-            />
+            >
+              {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
+            </span>
+
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
+            >
+              חזרה
+              <ArrowLeft className="h-4 w-4 rotate-180" />
+            </button>
           </div>
         </div>
-      )}
 
-      <div className="text-center text-xs text-muted-foreground">{progressLabel}</div>
-
-      <ComboMeter streak={streak} broke={comboBroke} />
-
-      {levelUp && (
-        <div className="glass animate-pop gradient-ring rounded-2xl border border-border p-2.5 text-center text-xs font-bold">
-          <span className="text-gradient">עלית רמה בנושא הזה</span>
-        </div>
-      )}
-
-      <div
-        key={question.signature + String(Boolean(feedback))}
-        className={`glass relative h-[230px] overflow-hidden rounded-3xl border text-center sm:h-[260px] ${
-          feedback
-            ? feedback.isCorrect
-              ? `animate-pop border-[var(--brand-lime)] ${streak >= 3 ? "animate-glow" : ""}`
-              : "animate-shake border-destructive"
-            : "gradient-ring border-border"
-        }`}
-      >
-        <AuroraOrb intensity={comboIntensity(streak)} />
-
-        <div className="relative flex h-full flex-col items-center justify-center overflow-y-auto p-6 sm:p-8">
-          <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
-            {question.typeLabel}
+        {remainingMs !== null && (
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-muted-foreground">{formatClock(remainingMs)}</span>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full transition-[width] duration-200"
+                style={{
+                  width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%`,
+                  background: "var(--gradient-trio)",
+                }}
+              />
+            </div>
           </div>
-          <div className={`font-bold leading-relaxed ${questionTextSize}`}>
-            {question.text.split("\n").map((line, i) => (
-              <div key={i} dir="auto" className="min-h-[0.6em]">
-                {line}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        )}
 
-      {feedback ? (
+        <div className="text-center text-xs text-muted-foreground">{progressLabel}</div>
+
+        <ComboMeter streak={streak} broke={comboBroke} />
+
+        {levelUp && (
+          <div className="glass animate-pop gradient-ring rounded-2xl border border-border p-2.5 text-center text-xs font-bold">
+            <span className="text-gradient">עלית רמה בנושא הזה</span>
+          </div>
+        )}
+
         <div
-          className={`glass animate-fade-in rounded-3xl border p-4 ${
-            feedback.isCorrect ? "border-[var(--brand-lime)]" : "border-destructive"
+          key={question.signature + String(Boolean(feedback))}
+          className={`glass relative h-[230px] overflow-hidden rounded-3xl border text-center sm:h-[260px] ${
+            feedback
+              ? feedback.isCorrect
+                ? `animate-pop border-[var(--brand-lime)] ${streak >= 3 ? "animate-glow" : ""}`
+                : "animate-shake border-destructive"
+              : "gradient-ring border-border"
           }`}
         >
-          <div className="mb-2 flex items-center gap-2 font-bold">
-            {feedback.isCorrect ? (
-              <>
-                <Check className="h-5 w-5 text-[var(--brand-lime)]" /> נכון! (
-                {formatSeconds(feedback.elapsed)} שניות)
-              </>
-            ) : (
-              <>
-                <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה: {question.answer}
-              </>
-            )}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {question.explanation.split("\n").map((line, i) => (
-              <p key={i} dir="auto">
-                {line}
-              </p>
-            ))}
-          </div>
+          <AuroraOrb intensity={comboIntensity(streak)} />
 
-          <button
-            onClick={onNext}
-            className="mt-4 w-full rounded-2xl bg-primary py-3 font-bold text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            שאלה הבאה
-          </button>
+          <div className="relative flex h-full flex-col items-center justify-center overflow-y-auto p-6 sm:p-8">
+            <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
+              {question.typeLabel}
+            </div>
+            <div className={`font-bold leading-relaxed ${questionTextSize}`}>
+              {question.text.split("\n").map((line, i) => (
+                <div key={i} dir="auto" className="min-h-[0.6em]">
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      ) : (
-        <>
+
+        {feedback && (
           <div
-            dir="ltr"
-            className="glass flex min-h-[68px] w-full items-center justify-center rounded-2xl border border-border py-4 text-center font-mono text-3xl font-bold tracking-widest"
+            className={`glass animate-fade-in rounded-3xl border p-4 ${
+              feedback.isCorrect ? "border-[var(--brand-lime)]" : "border-destructive"
+            }`}
           >
-            {userInput || "\u00A0"}
+            <div className="mb-2 flex items-center gap-2 font-bold">
+              {feedback.isCorrect ? (
+                <>
+                  <Check className="h-5 w-5 text-[var(--brand-lime)]" /> נכון! (
+                  {formatSeconds(feedback.elapsed)} שניות)
+                </>
+              ) : (
+                <>
+                  <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה: {question.answer}
+                </>
+              )}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {question.explanation.split("\n").map((line, i) => (
+                <p key={i} dir="auto">
+                  {line}
+                </p>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {KEYS.map((k) => (
-              <button
-                key={k}
-                onClick={() => onKeypad(k)}
-                className={`glass flex h-14 items-center justify-center rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent active:scale-95 ${
-                  k === "0" ? "col-span-2" : ""
-                }`}
-                aria-label={k === "del" ? "מחיקה" : k}
+        )}
+      </div>
+
+      {/* סרגל קבוע בתחתית המסך — המקלדת/כפתור השליחה תמיד באותו מקום, אין צורך לגלול */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 backdrop-blur-lg">
+        <div
+          className="mx-auto w-full max-w-2xl px-4 pt-3"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+        >
+          {feedback ? (
+            <button
+              onClick={onNext}
+              className="w-full rounded-2xl bg-primary py-3 font-bold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              שאלה הבאה
+            </button>
+          ) : (
+            <>
+              <div
+                dir="ltr"
+                className={`glass mb-2 flex h-[68px] w-full items-center justify-center overflow-hidden rounded-2xl border border-border px-2 text-center font-mono font-bold tracking-widest ${answerTextSize(userInput.length)}`}
               >
-                {k === "del" ? <Delete className="h-5 w-5" /> : k}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => onKeypad("-")}
-              className="glass h-12 rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent"
-              aria-label="שינוי סימן"
-            >
-              ±
-            </button>
-            <button
-              onClick={onSubmitNumeric}
-              disabled={userInput.trim() === "" || userInput.trim() === "-"}
-              className="col-span-2 h-12 rounded-2xl bg-primary font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
-              בדיקה
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+                <span className="whitespace-nowrap">{userInput || "\u00A0"}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {KEYS.map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => onKeypad(k)}
+                    className={`glass flex h-14 items-center justify-center rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent active:scale-95 ${
+                      k === "0" ? "col-span-2" : ""
+                    }`}
+                    aria-label={k === "del" ? "מחיקה" : k}
+                  >
+                    {k === "del" ? <Delete className="h-5 w-5" /> : k}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => onKeypad("-")}
+                  className="glass h-12 rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent"
+                  aria-label="שינוי סימן"
+                >
+                  ±
+                </button>
+                <button
+                  onClick={onSubmitNumeric}
+                  disabled={userInput.trim() === "" || userInput.trim() === "-"}
+                  className="col-span-2 h-12 rounded-2xl bg-primary font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+                >
+                  בדיקה
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
