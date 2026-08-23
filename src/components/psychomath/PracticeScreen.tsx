@@ -98,7 +98,7 @@ export function PracticeScreen({
   const targetMs = timeTargetSeconds(question.typeLabel) * 1000;
   const isOverTarget = !feedback && elapsed > targetMs;
 
-  /* גובה הכרטיס קבוע — מקטינים טקסט לשאלות ארוכות כדי להימנע מגלילה */
+  /* גודל טקסט השאלה מתכווץ לפי אורך, כדי שיתאים לכרטיס גם כשהגובה גמיש */
   const textLength = question.text.length;
   const questionTextSize =
     textLength > 190
@@ -110,121 +110,126 @@ export function PracticeScreen({
           : "text-xl sm:text-2xl";
 
   return (
-    <>
-      {/* אזור גלילה: כל מה שמעל המקלדת. pb גדול כדי שהתוכן לא יוסתר מאחורי הסרגל הקבוע */}
-      <div className="flex flex-col gap-4 py-2 pb-[280px]">
-
-        <div className="flex items-center justify-between gap-2">
-          <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-            {question.groupLabel}
-          </span>
-          <div className="flex items-center gap-3 text-xs">
-            <span
-              className="font-mono text-sm tabular-nums transition-colors duration-1000"
-              style={{
-                color: isOverTarget ? "var(--brand-coral)" : "var(--muted-foreground)",
-                transition: reducedMotion ? "none" : "color 1.5s ease",
-              }}
-            >
-              {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
+    <div className="fixed inset-x-0 top-0 z-10 flex" style={{ height: "100dvh" }}>
+      <div
+        className="mx-auto flex h-full w-full max-w-2xl flex-col px-4 pt-4"
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+      >
+        {/* ===== חלק עליון: קבוע בגובה טבעי ===== */}
+        <div className="flex shrink-0 flex-col gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="glass truncate rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+              {question.groupLabel}
             </span>
-
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
-            >
-              חזרה
-              <ArrowLeft className="h-4 w-4 rotate-180" />
-            </button>
-          </div>
-        </div>
-
-        {remainingMs !== null && (
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-muted-foreground">{formatClock(remainingMs)}</span>
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full transition-[width] duration-200"
+            <div className="flex items-center gap-3 text-xs">
+              <span
+                className="font-mono text-sm tabular-nums transition-colors duration-1000"
                 style={{
-                  width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%`,
-                  background: "var(--gradient-trio)",
+                  color: isOverTarget ? "var(--brand-coral)" : "var(--muted-foreground)",
+                  transition: reducedMotion ? "none" : "color 1.5s ease",
                 }}
-              />
+              >
+                {formatSeconds(feedback ? feedback.elapsed : elapsed)}s
+              </span>
+
+              <button
+                onClick={onBack}
+                className="flex items-center gap-1 font-semibold text-primary transition-opacity hover:opacity-80"
+              >
+                חזרה
+                <ArrowLeft className="h-4 w-4 rotate-180" />
+              </button>
             </div>
           </div>
-        )}
 
-        <div className="text-center text-xs text-muted-foreground">{progressLabel}</div>
-
-        <ComboMeter streak={streak} broke={comboBroke} />
-
-        {levelUp && (
-          <div className="glass animate-pop gradient-ring rounded-2xl border border-border p-2.5 text-center text-xs font-bold">
-            <span className="text-gradient">עלית רמה בנושא הזה</span>
-          </div>
-        )}
-
-        <div
-          key={question.signature + String(Boolean(feedback))}
-          className={`glass relative h-[230px] overflow-hidden rounded-3xl border text-center sm:h-[260px] ${
-            feedback
-              ? feedback.isCorrect
-                ? `animate-pop border-[var(--brand-lime)] ${streak >= 3 ? "animate-glow" : ""}`
-                : "animate-shake border-destructive"
-              : "gradient-ring border-border"
-          }`}
-        >
-          <AuroraOrb intensity={comboIntensity(streak)} />
-
-          <div className="relative flex h-full flex-col items-center justify-center overflow-y-auto p-6 sm:p-8">
-            <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
-              {question.typeLabel}
+          {remainingMs !== null && (
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs text-muted-foreground">{formatClock(remainingMs)}</span>
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full transition-[width] duration-200"
+                  style={{
+                    width: `${totalMs ? Math.max(0, (remainingMs / totalMs) * 100) : 0}%`,
+                    background: "var(--gradient-trio)",
+                  }}
+                />
+              </div>
             </div>
-            <div className={`font-bold leading-relaxed ${questionTextSize}`}>
-              {question.text.split("\n").map((line, i) => (
-                <div key={i} dir="auto" className="min-h-[0.6em]">
-                  {line}
-                </div>
-              ))}
+          )}
+
+          <div className="text-center text-xs text-muted-foreground">{progressLabel}</div>
+
+          <ComboMeter streak={streak} broke={comboBroke} />
+
+          {levelUp && (
+            <div className="glass animate-pop gradient-ring rounded-2xl border border-border p-2.5 text-center text-xs font-bold">
+              <span className="text-gradient">עלית רמה בנושא הזה</span>
             </div>
-          </div>
+          )}
         </div>
 
-        {feedback && (
+        {/* ===== חלק אמצעי: גמיש, ממלא את מה שנשאר ===== */}
+        <div className="flex min-h-0 flex-1 flex-col gap-3 py-3">
+          {/* עוטף חיצוני: רק חיתוך+מסגרת, בלי backdrop-filter — פותר דליפת Safari */}
           <div
-            className={`glass animate-fade-in rounded-3xl border p-4 ${
-              feedback.isCorrect ? "border-[var(--brand-lime)]" : "border-destructive"
+            key={question.signature + String(Boolean(feedback))}
+            className={`relative min-h-[110px] flex-1 overflow-hidden rounded-3xl border text-center ${
+              feedback
+                ? feedback.isCorrect
+                  ? `animate-pop border-[var(--brand-lime)] ${streak >= 3 ? "animate-glow" : ""}`
+                  : "animate-shake border-destructive"
+                : "gradient-ring border-border"
             }`}
           >
-            <div className="mb-2 flex items-center gap-2 font-bold">
-              {feedback.isCorrect ? (
-                <>
-                  <Check className="h-5 w-5 text-[var(--brand-lime)]" /> נכון! (
-                  {formatSeconds(feedback.elapsed)} שניות)
-                </>
-              ) : (
-                <>
-                  <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה: {question.answer}
-                </>
-              )}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {question.explanation.split("\n").map((line, i) => (
-                <p key={i} dir="auto">
-                  {line}
-                </p>
-              ))}
+            {/* עוטף פנימי: שכבת הזכוכית (blur) בלבד */}
+            <div className="glass absolute inset-0 rounded-3xl">
+              <AuroraOrb intensity={comboIntensity(streak)} />
+              <div className="relative flex h-full flex-col items-center justify-center overflow-y-auto p-6 sm:p-8">
+                <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
+                  {question.typeLabel}
+                </div>
+                <div className={`font-bold leading-relaxed ${questionTextSize}`}>
+                  {question.text.split("\n").map((line, i) => (
+                    <div key={i} dir="auto" className="min-h-[0.6em]">
+                      {line}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* סרגל קבוע בתחתית המסך — המקלדת/כפתור השליחה תמיד באותו מקום, אין צורך לגלול */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 backdrop-blur-lg">
-        <div
-          className="mx-auto w-full max-w-2xl px-4 pt-3"
-          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
-        >
+          {feedback && (
+            <div
+              className={`glass max-h-[38%] shrink-0 animate-fade-in overflow-y-auto rounded-3xl border p-4 ${
+                feedback.isCorrect ? "border-[var(--brand-lime)]" : "border-destructive"
+              }`}
+            >
+              <div className="mb-2 flex items-center gap-2 font-bold">
+                {feedback.isCorrect ? (
+                  <>
+                    <Check className="h-5 w-5 text-[var(--brand-lime)]" /> נכון! (
+                    {formatSeconds(feedback.elapsed)} שניות)
+                  </>
+                ) : (
+                  <>
+                    <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה: {question.answer}
+                  </>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {question.explanation.split("\n").map((line, i) => (
+                  <p key={i} dir="auto">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ===== חלק תחתון: קבוע בגובה טבעי — המקלדת או כפתור "שאלה הבאה" ===== */}
+        <div className="shrink-0">
           {feedback ? (
             <button
               onClick={onNext}
@@ -236,7 +241,7 @@ export function PracticeScreen({
             <>
               <div
                 dir="ltr"
-                className={`glass mb-2 flex h-[68px] w-full items-center justify-center overflow-hidden rounded-2xl border border-border px-2 text-center font-mono font-bold tracking-widest ${answerTextSize(userInput.length)}`}
+                className={`glass mb-2 flex h-[60px] w-full items-center justify-center overflow-hidden rounded-2xl border border-border px-2 text-center font-mono font-bold tracking-widest ${answerTextSize(userInput.length)}`}
               >
                 <span className="whitespace-nowrap">{userInput || "\u00A0"}</span>
               </div>
@@ -245,7 +250,7 @@ export function PracticeScreen({
                   <button
                     key={k}
                     onClick={() => onKeypad(k)}
-                    className={`glass flex h-14 items-center justify-center rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent active:scale-95 ${
+                    className={`glass flex h-12 items-center justify-center rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent active:scale-95 ${
                       k === "0" ? "col-span-2" : ""
                     }`}
                     aria-label={k === "del" ? "מחיקה" : k}
@@ -257,7 +262,7 @@ export function PracticeScreen({
               <div className="mt-2 grid grid-cols-3 gap-2">
                 <button
                   onClick={() => onKeypad("-")}
-                  className="glass h-12 rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent"
+                  className="glass h-11 rounded-2xl border border-border font-mono text-xl transition-colors hover:bg-accent"
                   aria-label="שינוי סימן"
                 >
                   ±
@@ -265,7 +270,7 @@ export function PracticeScreen({
                 <button
                   onClick={onSubmitNumeric}
                   disabled={userInput.trim() === "" || userInput.trim() === "-"}
-                  className="col-span-2 h-12 rounded-2xl bg-primary font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+                  className="col-span-2 h-11 rounded-2xl bg-primary font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
                 >
                   בדיקה
                 </button>
@@ -274,6 +279,6 @@ export function PracticeScreen({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
