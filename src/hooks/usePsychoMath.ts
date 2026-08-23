@@ -42,6 +42,7 @@ import {
   loadReminder,
   type ReminderPrefs,
 } from "@/lib/psychomath/reminders";
+import { computeNextInterval, getDueReviews } from "@/lib/psychomath/spacedReview";
 import type {
   CategoryKey,
   LevelMap,
@@ -57,6 +58,10 @@ export type SessionKind = "endless" | "exam" | "review" | "timed" | "fix";
 export const EXAM_LENGTH = 10;
 /** אורכי מנה קצרה בדקות */
 export const SHORT_SESSION_MINUTES = [3, 5] as const;
+
+/** שלב 4 של החזרה המרווחת: שילוב שאלות חזרה במנות רגילות */
+const SR_SESSION_CAP = 3; // מקסימום שאלות חזרה למנה
+const SR_INTERLEAVE_EVERY = 4; // כל כמה שאלות לשלב חזרה
 
 interface Feedback {
   isCorrect: boolean;
@@ -116,6 +121,8 @@ export function usePsychoMath() {
   const startTimeRef = useRef(0);
   const recentRef = useRef<string[]>([]);
   const reviewQueueRef = useRef<Question[]>([]);
+  const dueQueueRef = useRef<Question[]>([]);
+  const srServedRef = useRef(0);
   const catStreakRef = useRef<Record<string, { up: number; down: number }>>({});
   const levelsRef = useRef<LevelMap>(defaultLevels());
   const streakRef = useRef(0);
@@ -176,7 +183,17 @@ export function usePsychoMath() {
   const pushQuestion = useCallback(
     (nextMode: ModeKey, currentLevels: LevelMap, currentStats: StatsMap, kind: SessionKind) => {
       let q: Question | undefined;
-      if (kind === "review" || kind === "fix") {
+      if (
+        (kind === "endless" || kind === "timed") &&
+        sessionRef.current.answered > 0 &&
+        sessionRef.current.answered % SR_INTERLEAVE_EVERY === 0 &&
+        srServedRef.current < SR_SESSION_CAP &&
+        dueQueueRef.current.length > 0
+      ) {
+        q = dueQueueRef.current.shift();
+        srServedRef.current += 1;
+      }
+      if (!q && (kind === "review" || kind === "fix")) {
         q = reviewQueueRef.current.shift();
       }
       if (!q) {
@@ -209,10 +226,16 @@ export function usePsychoMath() {
       recentRef.current = [];
       // שאלת חימום ברמה נמוכה יותר בתחילת כל סשן
       nextDeltaRef.current = -1;
+      if (kind === "endless" || kind === "timed") {
+        dueQueueRef.current = getDueReviews(missed).map((m) => m.question);
+      } else {
+        dueQueueRef.current = [];
+      }
+      srServedRef.current = 0;
       pushQuestion(nextMode, levels, stats, kind);
       setScreen("practice");
     },
-    [levels, stats, pushQuestion],
+    [levels, stats, missed, pushQuestion],
   );
 
   const startReview = useCallback(() => {
@@ -370,18 +393,43 @@ export function usePsychoMath() {
       }
 
       if (!isCorrect) {
-        const entry: MissedQuestion = { question, givenAnswer: given, at: Date.now() };
         setMissed((prev) => {
+          const existing = prev.find((m) => m.question.signature === question.signature);
+          const sr = computeNextInterval(existing ?? {}, false);
+          const entry: MissedQuestion = {
+            question,
+            givenAnswer: given,
+            at: Date.now(),
+            nextReviewAt: sr.nextReviewAt,
+            intervalDays: sr.intervalDays,
+            failCount: sr.failCount,
+          };
           const updated = [entry, ...prev.filter((m) => m.question.signature !== question.signature)];
           queueSave({ missed: updated });
           return updated;
         });
-      } else if (session.kind === "review" || session.kind === "fix") {
-        setMissed((prev) => {
-          const updated = prev.filter((m) => m.question.signature !== question.signature);
-          queueSave({ missed: updated });
-          return updated;
-        });
+      } else {
+        const wasTrackedMissed = missed.some((m) => m.question.signature === question.signature);
+        if (wasTrackedMissed) {
+          setMissed((prev) => {
+            if (session.kind === "review" || session.kind === "fix") {
+              const updated = prev.filter((m) => m.question.signature !== question.signature);
+              queueSave({ missed: updated });
+              return updated;
+            }
+            // מנה רגילה: שאלת חזרה שנענתה נכון — מרווח החזרה גדל, לא נמחקת
+            const existing = prev.find((m) => m.question.signature === question.signature);
+            if (!existing) return prev;
+            const sr = computeNextInterval(existing, true);
+            const updated = prev.map((m) =>
+              m.question.signature === question.signature
+                ? { ...m, nextReviewAt: sr.nextReviewAt, intervalDays: sr.intervalDays, failCount: sr.failCount }
+                : m,
+            );
+            queueSave({ missed: updated });
+            return updated;
+          });
+        }
       }
 
       setSession((prev) => ({
@@ -396,7 +444,7 @@ export function usePsychoMath() {
 
       setFeedback({ isCorrect, elapsed, given });
     },
-    [question, session.kind],
+    [question, session.kind, missed],
   );
 
   const submitNumeric = useCallback(() => {
