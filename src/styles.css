@@ -185,7 +185,7 @@
 
 @utility aurora-orb {
   position: absolute;
-  inset: -35%;
+  inset: -18%;
   pointer-events: none;
   border-radius: 9999px;
   opacity: calc(0.42 + (var(--combo-intensity) * 0.38));
