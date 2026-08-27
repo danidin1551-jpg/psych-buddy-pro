@@ -30,6 +30,8 @@ export interface CategoryStat {
   correct: number;
   totalTime: number;
   bestTime: number | null;
+  /** כמה מהתשובות נענו בתוך יעד הזמן (pacing.ts) — שלב 5 של החזרה המרווחת */
+  onPace: number;
 }
 
 export type StatsMap = Record<CategoryKey, CategoryStat>;
