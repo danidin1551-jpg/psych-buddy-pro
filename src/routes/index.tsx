@@ -52,6 +52,7 @@ function Index() {
             onShowPath={() => app.setScreen("path")}
             onReview={app.startReview}
             missedCount={app.missed.length}
+            dueReviewCount={app.dueReviewCount}
             bestStreak={app.bestStreak}
             dayStreak={app.dayStreak}
             dayStreakValue={app.dayStreakValue}
@@ -127,4 +128,3 @@ function Index() {
     </div>
   );
 }
-
