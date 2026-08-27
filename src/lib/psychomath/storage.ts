@@ -30,7 +30,10 @@ function safeSet(key: string, value: string) {
 
 export function defaultStats(): StatsMap {
   return Object.fromEntries(
-    CATEGORY_KEYS.map((k) => [k, { attempts: 0, correct: 0, totalTime: 0, bestTime: null }]),
+    CATEGORY_KEYS.map((k) => [
+      k,
+      { attempts: 0, correct: 0, totalTime: 0, bestTime: null, onPace: 0 },
+    ]),
   ) as StatsMap;
 }
 
@@ -40,11 +43,19 @@ export function defaultLevels(): LevelMap {
 
 export function loadStats(): StatsMap {
   const raw = safeGet(STATS_KEY);
-  if (!raw) return defaultStats();
+  const base = defaultStats();
+  if (!raw) return base;
   try {
-    return { ...defaultStats(), ...(JSON.parse(raw) as StatsMap) };
+    const parsed = JSON.parse(raw) as Partial<StatsMap>;
+    // מיזוג לעומק לכל קטגוריה בנפרד — כדי שנתונים ישנים בלי onPace יקבלו ברירת מחדל 0
+    // במקום undefined (מיזוג שטחי היה מחליף את כל אובייקט הקטגוריה)
+    const merged = { ...base };
+    for (const key of CATEGORY_KEYS) {
+      merged[key] = { ...base[key], ...(parsed[key] ?? {}) };
+    }
+    return merged;
   } catch {
-    return defaultStats();
+    return base;
   }
 }
 
