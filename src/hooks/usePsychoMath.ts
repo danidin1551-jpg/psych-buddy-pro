@@ -43,6 +43,7 @@ import {
   type ReminderPrefs,
 } from "@/lib/psychomath/reminders";
 import { computeNextInterval, getDueReviews } from "@/lib/psychomath/spacedReview";
+import { timeTargetMs } from "@/lib/psychomath/pacing";
 import type {
   CategoryKey,
   LevelMap,
@@ -326,6 +327,7 @@ export function usePsychoMath() {
 
       setStats((prev) => {
         const base = prev[cat];
+        const isOnPace = elapsed <= timeTargetMs(question.typeLabel);
         const updated: StatsMap = {
           ...prev,
           [cat]: {
@@ -336,6 +338,7 @@ export function usePsychoMath() {
               isCorrect && (base.bestTime === null || elapsed < base.bestTime)
                 ? elapsed
                 : base.bestTime,
+            onPace: base.onPace + (isOnPace ? 1 : 0),
           },
         };
         queueSave({ stats: updated });
@@ -502,6 +505,8 @@ export function usePsychoMath() {
     dayStreak,
     dayStreakValue: currentStreakValue(dayStreak),
     practicedToday: practicedToday(dayStreak),
+    /** כמה שאלות חזרה מרווחת הגיע זמנן היום — שלב 5 (חשיפה ב-UI בלבד, לא משנה כפתורים קיימים) */
+    dueReviewCount: getDueReviews(missed).length,
     muted,
     toggleMuted,
     remainingMs,
