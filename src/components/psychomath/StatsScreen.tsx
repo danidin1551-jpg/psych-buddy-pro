@@ -15,11 +15,13 @@ export function StatsScreen({ stats, levels, onBack, onReset, onStartExam }: Pro
       acc.attempts += stats[k].attempts;
       acc.correct += stats[k].correct;
       acc.time += stats[k].totalTime;
+      acc.onPace += stats[k].onPace;
       return acc;
     },
-    { attempts: 0, correct: 0, time: 0 },
+    { attempts: 0, correct: 0, time: 0, onPace: 0 },
   );
   const overall = totals.attempts ? Math.round((totals.correct / totals.attempts) * 100) : 0;
+  const paceRate = totals.attempts ? Math.round((totals.onPace / totals.attempts) * 100) : 0;
 
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -48,6 +50,11 @@ export function StatsScreen({ stats, levels, onBack, onReset, onStartExam }: Pro
             <div className="text-[11px] text-muted-foreground">{card.label}</div>
           </div>
         ))}
+      </div>
+
+      <div className="rounded-2xl glass border border-border p-3 text-center">
+        <div className="font-mono text-xl font-bold">{totals.attempts ? `${paceRate}%` : "—"}</div>
+        <div className="text-[11px] text-muted-foreground">שאלות בתוך יעד הזמן</div>
       </div>
 
       <div className="flex flex-col gap-2">
