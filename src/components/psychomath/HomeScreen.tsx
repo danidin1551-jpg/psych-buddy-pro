@@ -13,6 +13,7 @@ interface Props {
   onShowPath: () => void;
   onReview: () => void;
   missedCount: number;
+  dueReviewCount: number;
   bestStreak: number;
   dayStreak: StreakData;
   dayStreakValue: number;
@@ -40,6 +41,7 @@ export function HomeScreen({
   onShowPath,
   onReview,
   missedCount,
+  dueReviewCount,
   bestStreak,
   dayStreak,
   dayStreakValue,
@@ -63,6 +65,15 @@ export function HomeScreen({
       <StreakCard data={dayStreak} value={dayStreakValue} today={practicedToday} />
 
       <ReminderCard prefs={reminder} onChange={onReminderChange} practicedToday={practicedToday} />
+
+      {dueReviewCount > 0 && (
+        <div className="glass flex items-center justify-between rounded-2xl border border-border px-4 py-3 text-sm">
+          <span className="text-muted-foreground">
+            יש לך <span className="font-mono font-bold text-foreground">{dueReviewCount}</span> שאלות לחזרה
+            היום
+          </span>
+        </div>
+      )}
 
       <section className="glass gradient-ring relative overflow-hidden rounded-3xl border border-border p-5">
         <AuroraOrb intensity={0.15} />
