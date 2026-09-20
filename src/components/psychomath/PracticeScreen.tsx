@@ -242,6 +242,12 @@ export function PracticeScreen({
                   </p>
                 ))}
               </div>
+              {question.tip && (
+                <div className="mt-3 rounded-2xl border border-border bg-muted/40 p-3 text-xs leading-relaxed" dir="auto">
+                  <span className="font-bold text-foreground">טיפ לפסיכומטרי: </span>
+                  {question.tip}
+                </div>
+              )}
             </div>
           )}
         </div>
