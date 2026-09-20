@@ -434,7 +434,8 @@ const RAW_GENERATORS: Record<Exclude<CategoryKey, "psychometric">, (level: numbe
 
 /** בחירה אדפטיבית: קטגוריות עם דיוק נמוך (או מעט תרגול) מקבלות משקל גבוה יותר */
 export function pickAdaptiveCategory(stats: StatsMap): Exclude<CategoryKey, "psychometric"> {
-  const adaptiveCategories = CATEGORY_KEYS.filter((c): c is Exclude<CategoryKey, "psychometric"> => c !== "psychometric");\n  const weights = adaptiveCategories.map((c) => {
+  const adaptiveCategories = CATEGORY_KEYS.filter((c): c is Exclude<CategoryKey, "psychometric"> => c !== "psychometric");
+  const weights = adaptiveCategories.map((c) => {
     const s = stats[c];
     if (!s || s.attempts < 3) return 2.5;
     const accuracy = s.correct / s.attempts;

@@ -234,7 +234,12 @@ export function PracticeScreen({
                   </>
                 ) : (
                   <>
-                    <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה הנכונה:{" "}\n                    <span dir="auto">\n                      {question.type === "multipleChoice" && question.options\n                        ? `${question.answer + 1}. ${question.options[question.answer]}`\n                        : question.answer}\n                    </span>
+                    <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה הנכונה:{" "}
+                    <span dir="auto">
+                      {question.type === "multipleChoice" && question.options
+                        ? `${question.answer + 1}. ${question.options[question.answer]}`
+                        : question.answer}
+                    </span>
                   </>
                 )}
               </div>
