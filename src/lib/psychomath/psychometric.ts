@@ -1,4 +1,5 @@
 import rawQuestions from "@/data/psychometricQuestions.json";
+import type { QuestionContent, QuestionSource } from "./content";
 import type { Question } from "./types";
 
 export interface PsychometricQuestion {
@@ -11,6 +12,8 @@ export interface PsychometricQuestion {
   correctAnswer: number;
   explanation: string;
   psychometricTip?: string;
+  content?: QuestionContent;
+  source?: QuestionSource;
 }
 
 const QUESTION_BANK = rawQuestions as PsychometricQuestion[];
@@ -24,9 +27,11 @@ function toQuestion(item: PsychometricQuestion): Question {
     typeLabel: item.subtopic,
     groupLabel: `פסיכומטרי · ${item.topic}`,
     text: item.question,
+    ...(item.content ? { content: item.content } : {}),
     answer: item.correctAnswer,
     explanation: item.explanation,
     ...(item.psychometricTip ? { tip: item.psychometricTip } : {}),
+    ...(item.source ? { source: item.source } : {}),
     signature: `psychometric|${item.id}`,
     sourceCategory: "psychometric",
     options: item.options,
