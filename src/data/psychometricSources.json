@@ -1,0 +1,12 @@
+[
+  {
+    "sourceId": "user_supplied_bank_2026-09",
+    "sourceType": "user_provided",
+    "organization": "User-supplied question bank",
+    "description": "Six questions supplied in the project conversation. They are not currently verified as official NITE questions.",
+    "language": "he",
+    "section": "quantitative",
+    "permissionStatus": "unverified",
+    "verified": false
+  }
+]
