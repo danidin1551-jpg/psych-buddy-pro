@@ -433,8 +433,8 @@ const RAW_GENERATORS: Record<Exclude<CategoryKey, "psychometric">, (level: numbe
 };
 
 /** בחירה אדפטיבית: קטגוריות עם דיוק נמוך (או מעט תרגול) מקבלות משקל גבוה יותר */
-export function pickAdaptiveCategory(stats: StatsMap): CategoryKey {
-  const weights = CATEGORY_KEYS.map((c) => {
+export function pickAdaptiveCategory(stats: StatsMap): Exclude<CategoryKey, "psychometric"> {
+  const adaptiveCategories = CATEGORY_KEYS.filter((c): c is Exclude<CategoryKey, "psychometric"> => c !== "psychometric");\n  const weights = adaptiveCategories.map((c) => {
     const s = stats[c];
     if (!s || s.attempts < 3) return 2.5;
     const accuracy = s.correct / s.attempts;
@@ -442,11 +442,11 @@ export function pickAdaptiveCategory(stats: StatsMap): CategoryKey {
   });
   const total = weights.reduce((a, b) => a + b, 0);
   let r = Math.random() * total;
-  for (let i = 0; i < CATEGORY_KEYS.length; i++) {
+  for (let i = 0; i < adaptiveCategories.length; i++) {
     r -= weights[i]!;
-    if (r <= 0) return CATEGORY_KEYS[i]!;
+    if (r <= 0) return adaptiveCategories[i]!;
   }
-  return CATEGORY_KEYS[CATEGORY_KEYS.length - 1]!;
+  return adaptiveCategories[adaptiveCategories.length - 1]!;
 }
 
 function build(cat: CategoryKey, level: number, recentSignatures: string[] = []): Question {

@@ -208,7 +208,7 @@ export function PracticeScreen({
                 <button
                   key={index}
                   onClick={() => onSelectOption(index)}
-                  className="glass rounded-2xl border border-border p-3 text-right text-sm font-semibold transition-colors hover:bg-accent active:scale-[0.99]"
+                  className="glass flex items-center gap-3 rounded-2xl border border-border p-3 text-right text-sm font-semibold transition-colors hover:bg-accent active:scale-[0.99]"
                   dir="auto"
                 >
                   <span className="ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border font-mono">
@@ -226,7 +226,7 @@ export function PracticeScreen({
                 feedback.isCorrect ? "border-[var(--brand-lime)]" : "border-destructive"
               }`}
             >
-              <div className="mb-2 flex items-center gap-2 font-bold">
+              <div className="mb-3 flex items-center gap-2 text-base font-bold">
                 {feedback.isCorrect ? (
                   <>
                     <Check className="h-5 w-5 text-[var(--brand-lime)]" /> נכון! (
@@ -234,19 +234,19 @@ export function PracticeScreen({
                   </>
                 ) : (
                   <>
-                    <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה: {question.answer}
+                    <X className="h-5 w-5 text-destructive" /> לא נכון · התשובה הנכונה:{" "}\n                    <span dir="auto">\n                      {question.type === "multipleChoice" && question.options\n                        ? `${question.answer + 1}. ${question.options[question.answer]}`\n                        : question.answer}\n                    </span>
                   </>
                 )}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-base leading-7 text-muted-foreground">
                 {question.explanation.split("\n").map((line, i) => (
-                  <p key={i} dir="auto">
+                  <p key={i} dir="auto" className="mb-1 last:mb-0">
                     {line}
                   </p>
                 ))}
               </div>
               {question.tip && (
-                <div className="mt-3 rounded-2xl border border-border bg-muted/40 p-3 text-xs leading-relaxed" dir="auto">
+                <div className="mt-4 rounded-2xl border border-border bg-muted/40 p-3 text-sm leading-6" dir="auto">
                   <span className="font-bold text-foreground">טיפ לפסיכומטרי: </span>
                   {question.tip}
                 </div>
