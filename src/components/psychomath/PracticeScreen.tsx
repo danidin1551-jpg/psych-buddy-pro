@@ -55,6 +55,7 @@ export function PracticeScreen({
   levelUp = false,
   onKeypad,
   onSubmitNumeric,
+  onSelectOption,
   onNext,
   onBack,
 }: Props) {

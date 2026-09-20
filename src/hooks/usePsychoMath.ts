@@ -529,6 +529,7 @@ export function usePsychoMath() {
     nextQuestion,
     finishSession,
     submitNumeric,
+    submitChoice,
     handleKeypad,
     resetStats,
     goHome,
