@@ -1,3 +1,5 @@
+import type { QuestionContent, QuestionSource } from "./content";
+
 export const CATEGORY_KEYS = [
   "algebra",
   "multiplication",
@@ -17,10 +19,13 @@ export interface Question {
   typeLabel: string;
   groupLabel: string;
   text: string;
+  content?: QuestionContent;
   /** numeric answer for numeric questions; zero-based option index for multiple choice */
   answer: number;
   explanation: string;
   tip?: string;
+  source?: QuestionSource;
+  explanationContent?: QuestionContent;
   signature: string;
   sourceCategory: CategoryKey;
   options?: string[];
