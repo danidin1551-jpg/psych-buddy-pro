@@ -50,6 +50,7 @@
                 "wordProblems",
                 "geometry",
                 "probability",
+                "psychometric",
                 "mixed"
               ],
               "description": "Topic key. Use list_topics for the catalog. 'mixed' picks adaptively."
@@ -90,6 +91,7 @@
                 "wordProblems",
                 "geometry",
                 "probability",
+                "psychometric",
                 "mixed"
               ],
               "description": "Topic key, or 'mixed' for a varied set."
