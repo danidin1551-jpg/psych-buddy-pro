@@ -26,7 +26,7 @@ function toQuestion(item: PsychometricQuestion): Question {
     text: item.question,
     answer: item.correctAnswer,
     explanation: item.explanation,
-    tip: item.psychometricTip,
+    ...(item.psychometricTip ? { tip: item.psychometricTip } : {}),
     signature: `psychometric|${item.id}`,
     sourceCategory: "psychometric",
     options: item.options,

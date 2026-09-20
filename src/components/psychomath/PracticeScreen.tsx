@@ -18,7 +18,8 @@ interface Props {
   totalMs?: number | null;
   levelUp?: boolean;
   onKeypad: (key: string) => void;
-  onSubmitNumeric: () => void;\n  onSelectOption: (index: number) => void;
+  onSubmitNumeric: () => void;
+  onSelectOption: (index: number) => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -54,6 +55,7 @@ export function PracticeScreen({
   levelUp = false,
   onKeypad,
   onSubmitNumeric,
+  onSelectOption,
   onNext,
   onBack,
 }: Props) {
@@ -86,7 +88,8 @@ export function PracticeScreen({
         }
         return;
       }
-      if (question.type === "multipleChoice") return;\n      if (/^[0-9]$/.test(e.key)) onKeypad(e.key);
+      if (question.type === "multipleChoice") return;
+      if (/^[0-9]$/.test(e.key)) onKeypad(e.key);
       else if (e.key === "-") onKeypad("-");
       else if (e.key === "Backspace") onKeypad("del");
       else if (e.key === "Enter") onSubmitNumeric();

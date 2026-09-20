@@ -4,6 +4,7 @@ import {
   type Question,
   type StatsMap,
 } from "./types";
+import { getRandomPsychometricQuestion } from "./psychometric";
 
 type RawQuestion = Omit<Question, "signature" | "sourceCategory">;
 
@@ -421,7 +422,7 @@ function generateProbabilityQuestion(level: number): RawQuestion {
 
 /* ============================== מנוע ============================== */
 
-const RAW_GENERATORS: Record<CategoryKey, (level: number) => RawQuestion> = {
+const RAW_GENERATORS: Record<Exclude<CategoryKey, "psychometric">, (level: number) => RawQuestion> = {
   algebra: generateAlgebraQuestion,
   multiplication: generateMultiplicationQuestion,
   powers: generatePowersQuestion,
@@ -448,7 +449,8 @@ export function pickAdaptiveCategory(stats: StatsMap): CategoryKey {
   return CATEGORY_KEYS[CATEGORY_KEYS.length - 1]!;
 }
 
-function build(cat: CategoryKey, level: number): Question {
+function build(cat: CategoryKey, level: number, recentSignatures: string[] = []): Question {
+  if (cat === "psychometric") return getRandomPsychometricQuestion(level, recentSignatures);
   const raw = RAW_GENERATORS[cat](level);
   return { ...raw, sourceCategory: cat, signature: `${cat}|${raw.text}` };
 }
@@ -467,11 +469,11 @@ export function generateQuestion(
     Math.max(1, Math.min(10, (levels[cat] ?? 1) + levelDelta));
   for (let attempt = 0; attempt < 12; attempt++) {
     const cat = mode === "mixed" ? pickAdaptiveCategory(stats) : mode;
-    const q = build(cat, levelOf(cat));
+    const q = build(cat, levelOf(cat), recentSignatures);
     if (!recentSignatures.includes(q.signature)) return q;
   }
   const cat = mode === "mixed" ? pickAdaptiveCategory(stats) : mode;
-  return build(cat, levelOf(cat));
+  return build(cat, levelOf(cat), recentSignatures);
 }
 
 
