@@ -450,7 +450,7 @@ export function usePsychoMath() {
     [question, session.kind, missed],
   );
 
-  const submitNumeric = useCallback(() => {
+  const submitChoice = useCallback((optionIndex: number) => {\n    if (!question || feedback || question.type !== "multipleChoice") return;\n    const option = question.options?.[optionIndex];\n    if (option === undefined) return;\n    grade(optionIndex === question.answer, option);\n  }, [question, feedback, grade]);\n\n  const submitNumeric = useCallback(() => {
     if (!question || feedback) return;
     if (userInput.trim() === "" || userInput.trim() === "-") return;
     grade(isAnswerCorrect(userInput, question.answer), userInput);
