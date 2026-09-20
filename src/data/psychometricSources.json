@@ -8,5 +8,15 @@
     "section": "quantitative",
     "permissionStatus": "unverified",
     "verified": false
+  },
+  {
+    "sourceId": "nite_hebrew_public_use_collection",
+    "sourceType": "official_nite",
+    "organization": "המרכז הארצי לבחינות ולהערכה (מאל"ו)",
+    "description": "Official collection of older Hebrew psychometric test forms designated by NITE for public/educational/research use. The specific permitted form and its question-level provenance must be recorded before importing questions.",
+    "language": "he",
+    "section": "quantitative",
+    "permissionStatus": "public_educational",
+    "verified": true
   }
 ]
