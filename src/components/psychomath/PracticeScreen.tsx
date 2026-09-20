@@ -264,6 +264,8 @@ export function PracticeScreen({
             >
               שאלה הבאה
             </button>
+          ) : question.type === "multipleChoice" ? (
+            <div className="h-[60px]" aria-hidden="true" />
           ) : (
             <>
               <div

@@ -185,6 +185,7 @@ export function usePsychoMath() {
     (nextMode: ModeKey, currentLevels: LevelMap, currentStats: StatsMap, kind: SessionKind) => {
       let q: Question | undefined;
       if (
+        nextMode !== "psychometric" &&
         (kind === "endless" || kind === "timed") &&
         sessionRef.current.answered > 0 &&
         sessionRef.current.answered % SR_INTERLEAVE_EVERY === 0 &&
@@ -228,7 +229,10 @@ export function usePsychoMath() {
       // שאלת חימום ברמה נמוכה יותר בתחילת כל סשן
       nextDeltaRef.current = -1;
       if (kind === "endless" || kind === "timed") {
-        dueQueueRef.current = getDueReviews(missed).map((m) => m.question);
+        dueQueueRef.current =
+          nextMode === "psychometric"
+            ? []
+            : getDueReviews(missed).map((m) => m.question);
       } else {
         dueQueueRef.current = [];
       }
