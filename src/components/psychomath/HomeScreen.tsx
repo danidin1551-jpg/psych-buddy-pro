@@ -33,6 +33,7 @@ const ORDER: ModeKey[] = [
   "wordProblems",
   "geometry",
   "probability",
+  "psychometric",
 ];
 
 export function HomeScreen({
