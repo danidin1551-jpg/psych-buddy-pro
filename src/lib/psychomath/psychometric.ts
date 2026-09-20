@@ -39,9 +39,23 @@ export function getPsychometricQuestions(): Question[] {
 
 export function getRandomPsychometricQuestion(level = 1, recentSignatures: string[] = []): Question {
   const target = difficultyForLevel(level);
-  const candidates = QUESTION_BANK.filter((q) => Math.abs(q.difficulty - target) <= 1);
-  const pool = candidates.length > 0 ? candidates : QUESTION_BANK;
-  const unseen = pool.filter((q) => !recentSignatures.includes(`psychometric|${q.id}`));
-  const source = unseen.length > 0 ? unseen : pool;
+
+  // Prefer questions we have not shown recently from the entire bank.
+  // This prevents low-level sessions from getting stuck on only the
+  // difficulty-2 questions when the bank contains several difficulty levels.
+  const unseen = QUESTION_BANK.filter(
+    (q) => !recentSignatures.includes(`psychometric|${q.id}`),
+  );
+
+  // When there are unseen questions, prefer those near the current level,
+  // but fall back to any unseen question so the full bank gets rotation.
+  const preferredUnseen = unseen.filter((q) => Math.abs(q.difficulty - target) <= 1);
+  const source =
+    preferredUnseen.length > 0
+      ? preferredUnseen
+      : unseen.length > 0
+        ? unseen
+        : QUESTION_BANK;
+
   return toQuestion(source[Math.floor(Math.random() * source.length)]!);
 }
