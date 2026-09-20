@@ -6,23 +6,24 @@ export const CATEGORY_KEYS = [
   "wordProblems",
   "geometry",
   "probability",
+  "psychometric",
 ] as const;
 
 export type CategoryKey = (typeof CATEGORY_KEYS)[number];
 export type ModeKey = CategoryKey | "mixed";
 
 export interface Question {
-  /** תמיד קלט מספרי — פורמט ההשוואה A/B הוסר */
-  type: "numeric";
-
+  type: "numeric" | "multipleChoice";
   typeLabel: string;
   groupLabel: string;
   text: string;
+  /** numeric answer for numeric questions; zero-based option index for multiple choice */
   answer: number;
   explanation: string;
-  /** stable-ish signature used to avoid immediate repeats */
+  tip?: string;
   signature: string;
   sourceCategory: CategoryKey;
+  options?: string[];
 }
 
 export interface CategoryStat {
@@ -30,38 +31,25 @@ export interface CategoryStat {
   correct: number;
   totalTime: number;
   bestTime: number | null;
-  /** כמה מהתשובות נענו בתוך יעד הזמן (pacing.ts) — שלב 5 של החזרה המרווחת */
   onPace: number;
 }
 
 export type StatsMap = Record<CategoryKey, CategoryStat>;
-
 export type LevelMap = Record<CategoryKey, number>;
 
 export interface MissedQuestion {
   question: Question;
   givenAnswer: string;
   at: number;
-  /**
-   * מתי השאלה זמינה לחזרה הבאה (timestamp).
-   * undefined = זמינה עכשיו (תאימות לאחור לנתונים ישנים).
-   */
   nextReviewAt?: number;
-  /** המרווח הנוכחי בימים */
   intervalDays?: number;
-  /** כמה פעמים נכשלה ברצף, כולל אחרי חזרות */
   failCount?: number;
 }
 
-/** תאימות לאחור: רשומה בלי nextReviewAt נחשבת זמינה תמיד */
 export function isDueForReview(m: MissedQuestion, now = Date.now()): boolean {
   return m.nextReviewAt === undefined || m.nextReviewAt <= now;
 }
 
-/**
- * לכל נושא אייקון עגול עם מילוי גרדיאנט משלישיית המותג בלבד
- * (קורל / ליים / ציאן, ועוד סגול לרגעי שיא) — בלי "רעש" צבעוני שרירותי.
- */
 export const CATEGORY_META: Record<
   ModeKey,
   { name: string; description: string; icon: string; accent: string; gradient: string }
@@ -115,6 +103,13 @@ export const CATEGORY_META: Record<
     accent: "var(--brand-coral)",
     gradient: "linear-gradient(135deg, var(--brand-coral), var(--brand-lime))",
   },
+  psychometric: {
+    name: "פסיכומטרי — כמותי",
+    description: "שאלות פסיכומטרי מלאות עם תשובות והסברים",
+    icon: "PS",
+    accent: "var(--brand-violet)",
+    gradient: "linear-gradient(135deg, var(--brand-violet), var(--brand-coral))",
+  },
   mixed: {
     name: "אימון אדפטיבי",
     description: "מתמקד אוטומטית בנושאים בהם הדיוק שלך נמוך יותר",
@@ -123,7 +118,6 @@ export const CATEGORY_META: Record<
     gradient: "var(--gradient-trio)",
   },
 };
-
 
 export const CATEGORY_NAMES = Object.fromEntries(
   CATEGORY_KEYS.map((k) => [k, CATEGORY_META[k].name]),

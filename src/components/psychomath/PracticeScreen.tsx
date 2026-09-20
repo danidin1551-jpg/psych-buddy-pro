@@ -18,7 +18,7 @@ interface Props {
   totalMs?: number | null;
   levelUp?: boolean;
   onKeypad: (key: string) => void;
-  onSubmitNumeric: () => void;
+  onSubmitNumeric: () => void;\n  onSelectOption: (index: number) => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -86,7 +86,7 @@ export function PracticeScreen({
         }
         return;
       }
-      if (/^[0-9]$/.test(e.key)) onKeypad(e.key);
+      if (question.type === "multipleChoice") return;\n      if (/^[0-9]$/.test(e.key)) onKeypad(e.key);
       else if (e.key === "-") onKeypad("-");
       else if (e.key === "Backspace") onKeypad("del");
       else if (e.key === "Enter") onSubmitNumeric();
@@ -199,6 +199,24 @@ export function PracticeScreen({
             </div>
           </div>
 
+          {question.type === "multipleChoice" && !feedback && question.options && (
+            <div className="grid shrink-0 gap-2">
+              {question.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => onSelectOption(index)}
+                  className="glass rounded-2xl border border-border p-3 text-right text-sm font-semibold transition-colors hover:bg-accent active:scale-[0.99]"
+                  dir="auto"
+                >
+                  <span className="ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border font-mono">
+                    {index + 1}
+                  </span>
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+
           {feedback && (
             <div
               className={`glass max-h-[38%] shrink-0 animate-fade-in overflow-y-auto rounded-3xl border p-4 ${
@@ -224,6 +242,12 @@ export function PracticeScreen({
                   </p>
                 ))}
               </div>
+              {question.tip && (
+                <div className="mt-3 rounded-2xl border border-border bg-muted/40 p-3 text-xs leading-relaxed" dir="auto">
+                  <span className="font-bold text-foreground">טיפ לפסיכומטרי: </span>
+                  {question.tip}
+                </div>
+              )}
             </div>
           )}
         </div>
