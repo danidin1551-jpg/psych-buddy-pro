@@ -96,7 +96,7 @@ export function PracticeScreen({
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [feedback, onKeypad, onNext, onSubmitNumeric]);
+  }, [feedback, onKeypad, onNext, onSubmitNumeric, question.type]);
 
   const targetMs = timeTargetSeconds(question.typeLabel) * 1000;
   const isOverTarget = !feedback && elapsed > targetMs;
@@ -203,18 +203,18 @@ export function PracticeScreen({
           </div>
 
           {question.type === "multipleChoice" && !feedback && question.options && (
-            <div className="grid shrink-0 gap-2">
+            <div className="grid shrink-0 gap-2" dir="rtl">
               {question.options.map((option, index) => (
                 <button
                   key={index}
                   onClick={() => onSelectOption(index)}
-                  className="glass flex items-center gap-3 rounded-2xl border border-border p-3 text-right text-sm font-semibold transition-colors hover:bg-accent active:scale-[0.99]"
-                  dir="auto"
+                  className="glass flex w-full items-center justify-start gap-3 rounded-2xl border border-border p-3 text-right text-sm font-semibold transition-colors hover:bg-accent active:scale-[0.99]"
+                  dir="rtl"
                 >
-                  <span className="ml-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border font-mono">
+                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border font-mono">
                     {index + 1}
                   </span>
-                  {option}
+                  <span dir="auto">{option}</span>
                 </button>
               ))}
             </div>
