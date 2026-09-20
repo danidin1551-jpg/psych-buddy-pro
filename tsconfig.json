@@ -8,7 +8,7 @@
     "types": ["vite/client"],
 
     "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": true,\n    "resolveJsonModule": true,
     "verbatimModuleSyntax": false,
     "noEmit": true,
 
