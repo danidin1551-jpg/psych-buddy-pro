@@ -5,6 +5,7 @@ import { timeTargetSeconds } from "@/lib/psychomath/pacing";
 import { comboIntensity } from "@/lib/psychomath/feedback";
 import { ComboMeter } from "./ComboMeter";
 import { AuroraOrb } from "./AuroraOrb";
+import { QuestionContentView } from "./QuestionContentView";
 
 
 interface Props {
@@ -191,13 +192,20 @@ export function PracticeScreen({
                 <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
                   {question.typeLabel}
                 </div>
-                <div className={`font-bold leading-relaxed ${questionTextSize}`}>
-                  {question.text.split("\n").map((line, i) => (
-                    <div key={i} dir="auto" className="min-h-[0.6em]">
-                      {line}
-                    </div>
-                  ))}
-                </div>
+                {question.content ? (
+                  <QuestionContentView
+                    content={question.content}
+                    className={`font-bold leading-relaxed ${questionTextSize}`}
+                  />
+                ) : (
+                  <div className={`font-bold leading-relaxed ${questionTextSize}`}>
+                    {question.text.split("\n").map((line, i) => (
+                      <div key={i} dir="auto" className="min-h-[0.6em]">
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
